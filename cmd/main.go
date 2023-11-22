@@ -9,10 +9,10 @@ import (
 
 	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/dc-dc-dc/cheetah/market/basic"
+	"github.com/dc-dc-dc/cheetah/market/csv"
 )
 
-func main() {
-	fmt.Printf("Cheetah a market tool potentially.\n")
+func fakeProducer() market.MarketProducer {
 	lines := []market.MarketLine{
 		market.NewMarketLineFromString(time.Now().Add(1*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
 		market.NewMarketLineFromString(time.Now().Add(2*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
@@ -22,13 +22,23 @@ func main() {
 		market.NewMarketLineFromString(time.Now().Add(6*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
 		market.NewMarketLineFromString(time.Now().Add(7*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
 	}
-	basicProducer := basic.NewBasicProducer(lines, 1)
+	return basic.NewBasicProducer(lines, 1)
+}
 
+func main() {
+	fmt.Printf("Cheetah a market tool potentially.\n")
 	out := make(chan market.MarketLine)
 	ctx := context.Background()
 
+	// producer := fakeProducer()
+	producer, err := csv.NewCsvProducerFromFile("data/apple.csv")
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return
+	}
+	defer producer.Close()
 	rcvMgr := market.NewReceiverManager(ctx)
-	rcvMgr.AddReceiver(basic.NewBasicReceiver())
+	rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
 
 	// For testing purposes...
 	// Create a producer
@@ -37,7 +47,7 @@ func main() {
 	//  - Bot (making trades)
 	go func(ctx context.Context, out chan market.MarketLine) {
 		for {
-			if err := basicProducer.Produce(ctx, out); err != nil {
+			if err := producer.Produce(ctx, out); err != nil {
 				fmt.Printf("producer err: %v\n", err)
 				return
 			}
