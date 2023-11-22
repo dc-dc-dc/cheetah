@@ -31,12 +31,13 @@ func main() {
 	ctx := context.Background()
 
 	// producer := fakeProducer()
-	producer, err := csv.NewCsvProducerFromFile("data/apple.csv")
+	file, err := os.Open("data/apple.csv")
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 		return
 	}
-	defer producer.Close()
+	defer file.Close()
+	producer := csv.NewYFinanceProducer("AAPL", csv.YFinanceInterval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
 	rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
 
