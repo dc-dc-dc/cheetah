@@ -31,12 +31,13 @@ func main() {
 	ctx := context.Background()
 
 	// producer := fakeProducer()
-	file, err := os.Open("data/apple.csv")
-	if err != nil {
-		fmt.Printf("err: %v\n", err)
-		return
-	}
-	defer file.Close()
+	// file, err := os.Open("data/apple.csv")
+	// if err != nil {
+	// 	fmt.Printf("err: %v\n", err)
+	// 	return
+	// }
+	// defer file.Close()
+	// producer := csv.NewCSVProducer(file)
 	producer := csv.NewYFinanceProducer("AAPL", csv.YFinanceInterval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
 	rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
@@ -44,8 +45,6 @@ func main() {
 	// For testing purposes...
 	// Create a producer
 	//
-	// Have receivers(s)
-	//  - Bot (making trades)
 	go func(ctx context.Context, out chan market.MarketLine) {
 		for {
 			if err := producer.Produce(ctx, out); err != nil {
