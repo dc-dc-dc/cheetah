@@ -14,13 +14,13 @@ import (
 
 func fakeProducer() market.MarketProducer {
 	lines := []market.MarketLine{
-		market.NewMarketLineFromString(time.Now().Add(1*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(2*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(3*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(4*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(5*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(6*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
-		market.NewMarketLineFromString(time.Now().Add(7*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(1*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(2*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(3*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(4*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(5*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(6*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
+		market.EnsureMarketLineFromString(time.Now().Add(7*time.Minute), "8.0", "10.0", "7.0", "7.5", 1),
 	}
 	return basic.NewBasicProducer(lines, 1)
 }

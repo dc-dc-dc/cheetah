@@ -15,14 +15,36 @@ type MarketLine struct {
 	Volume int64
 }
 
-// Note: This will panic if the string is not a valid decimal.
-func NewMarketLineFromString(start time.Time, open, high, low, close string, vol int64) MarketLine {
-	return MarketLine{
-		Start:  start,
-		Open:   decimal.RequireFromString(open),
-		High:   decimal.RequireFromString(high),
-		Low:    decimal.RequireFromString(low),
-		Close:  decimal.RequireFromString(close),
-		Volume: vol,
+func EnsureMarketLineFromString(start time.Time, open, high, low, close string, vol int64) MarketLine {
+	line, err := NewMarketLineFromString(start, open, high, low, close, vol)
+	if err != nil {
+		panic(err)
 	}
+	return *line
+}
+
+func NewMarketLineFromString(start time.Time, open, high, low, close string, vol int64) (*MarketLine, error) {
+	var _open, _close, _high, _low decimal.Decimal
+	var err error
+	if _open, err = decimal.NewFromString(open); err != nil {
+		return nil, err
+	}
+	if _close, err = decimal.NewFromString(close); err != nil {
+		return nil, err
+	}
+	if _high, err = decimal.NewFromString(high); err != nil {
+		return nil, err
+	}
+	if _low, err = decimal.NewFromString(low); err != nil {
+		return nil, err
+	}
+
+	return &MarketLine{
+		Start:  start,
+		Open:   _open,
+		High:   _high,
+		Low:    _low,
+		Close:  _close,
+		Volume: vol,
+	}, nil
 }

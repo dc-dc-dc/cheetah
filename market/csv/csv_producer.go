@@ -54,7 +54,11 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 			return err
 		}
 
-		out <- market.NewMarketLineFromString(start, splts[1], splts[2], splts[3], splts[4], volume)
+		line, err := market.NewMarketLineFromString(start, splts[1], splts[2], splts[3], splts[4], volume)
+		if err != nil {
+			return err
+		}
+		out <- *line
 	}
 	return io.ErrClosedPipe
 }
