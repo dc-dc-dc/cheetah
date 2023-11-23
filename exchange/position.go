@@ -2,6 +2,9 @@ package exchange
 
 import (
 	"time"
+
+	"github.com/dc-dc-dc/cheetah/market"
+	"github.com/shopspring/decimal"
 )
 
 type PositionState int
@@ -17,7 +20,7 @@ type Position struct {
 	OpenedAt time.Time
 	ClosedAt time.Time
 
-	symbol string
+	symbol market.Symbol
 
 	orders []*Order
 }
@@ -39,6 +42,16 @@ func (p Position) HasOpen() bool {
 	return false
 }
 
+func (p Position) ActiveOrders() []*Order {
+	orders := make([]*Order, 0)
+	for _, o := range p.orders {
+		if o.IsOpen() {
+			orders = append(orders, o)
+		}
+	}
+	return orders
+}
+
 func (p Position) Size() int64 {
 	var size int64
 	for _, o := range p.orders {
@@ -51,7 +64,25 @@ func (p Position) Size() int64 {
 	return size
 }
 
-func (p Position) Symbol() string {
+func (p Position) AveragePrice() decimal.Decimal {
+	var total decimal.Decimal
+	var size int64
+	for _, o := range p.orders {
+		if o.IsBuy() {
+			total = total.Add(o.FilledPrice.Mul(decimal.NewFromInt(o.Filled)))
+			size += o.Filled
+		} else {
+			total = total.Sub(o.FilledPrice.Mul(decimal.NewFromInt(o.Filled)))
+			size -= o.Filled
+		}
+	}
+	if size == 0 {
+		return decimal.Zero
+	}
+	return total.Div(decimal.NewFromInt(size))
+}
+
+func (p Position) Symbol() market.Symbol {
 	return p.symbol
 }
 

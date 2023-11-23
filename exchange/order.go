@@ -3,6 +3,7 @@ package exchange
 import (
 	"time"
 
+	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/oklog/ulid/v2"
 	"github.com/shopspring/decimal"
 )
@@ -47,13 +48,13 @@ type Order struct {
 	Price       decimal.Decimal
 	FilledPrice decimal.Decimal
 
-	Symbol string
+	Symbol market.Symbol
 
 	Requested int64
 	Filled    int64
 }
 
-func NewMarketBuyOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewMarketBuyOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideBuy,
@@ -64,7 +65,7 @@ func NewMarketBuyOrder(symbol string, price decimal.Decimal, amount int64) Order
 	}
 }
 
-func NewMarketSellOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewMarketSellOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideSell,
@@ -75,7 +76,7 @@ func NewMarketSellOrder(symbol string, price decimal.Decimal, amount int64) Orde
 	}
 }
 
-func NewLimitBuyOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewLimitBuyOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideBuy,
@@ -86,7 +87,7 @@ func NewLimitBuyOrder(symbol string, price decimal.Decimal, amount int64) Order 
 	}
 }
 
-func NewLimitSellOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewLimitSellOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideSell,
@@ -97,7 +98,7 @@ func NewLimitSellOrder(symbol string, price decimal.Decimal, amount int64) Order
 	}
 }
 
-func NewStopBuyOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewStopBuyOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideBuy,
@@ -108,7 +109,7 @@ func NewStopBuyOrder(symbol string, price decimal.Decimal, amount int64) Order {
 	}
 }
 
-func NewStopSellOrder(symbol string, price decimal.Decimal, amount int64) Order {
+func NewStopSellOrder(symbol market.Symbol, price decimal.Decimal, amount int64) Order {
 	return Order{
 		ID:        EnsureID(),
 		Side:      OrderSideSell,
