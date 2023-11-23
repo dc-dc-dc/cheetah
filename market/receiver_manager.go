@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+const (
+	ContextReceiverIndex = "receiver.index"
+	ContextCache         = "receiver.cache"
+)
+
 type ReceiverManager struct {
 	sync.Mutex
 	ctx          context.Context
@@ -31,7 +36,8 @@ func (m *ReceiverManager) run() {
 
 			for index, receiver := range m.receivers {
 				wg.Add(1)
-				ctx := context.WithValue(m.ctx, "receiver", index)
+				ctx := context.WithValue(m.ctx, ContextReceiverIndex, index)
+				ctx = context.WithValue(ctx, ContextCache, make(map[string]interface{}))
 				var removeSelf func()
 				removeSelf = func() {
 					m.Lock()

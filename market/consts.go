@@ -8,6 +8,7 @@ const (
 
 var (
 	ErrSymbolNotFound = errors.New("symbol not found")
+	ErrNoContextCache = errors.New("no context cache")
 )
 
 type Interval int

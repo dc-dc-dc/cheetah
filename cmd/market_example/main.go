@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"time"
@@ -10,6 +12,7 @@ import (
 	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/dc-dc-dc/cheetah/market/basic"
 	"github.com/dc-dc-dc/cheetah/market/csv"
+	"github.com/dc-dc-dc/cheetah/market/indicator"
 )
 
 func fakeProducer() market.MarketProducer {
@@ -40,15 +43,18 @@ func main() {
 	// producer := csv.NewCSVProducer(file)
 	producer := csv.NewYFinanceProducer("AAPL", market.Interval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
-	rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
-
+	// rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
+	rcvMgr.AddReceiver(market.NewChainedReceiver(indicator.NewSimpleMovingAverage(5), basic.NewBasicReceiver(indicator.ContextIndicatorSimpleMovingAverage)))
 	// For testing purposes...
 	// Create a producer
 	//
 	go func(ctx context.Context, out chan market.MarketLine) {
 		for {
 			if err := producer.Produce(ctx, out); err != nil {
-				fmt.Printf("producer err: %v\n", err)
+				if !errors.Is(err, io.ErrClosedPipe) {
+					fmt.Printf("[producer] err: %v\n", err)
+				}
+				close(out)
 				return
 			}
 		}
@@ -59,7 +65,10 @@ func main() {
 			select {
 			case <-ctx.Done():
 				return
-			case line := <-out:
+			case line, ok := <-out:
+				if !ok {
+					return
+				}
 				if err := rcvMgr.Receive(ctx, line); err != nil {
 					fmt.Printf("listener err: %v\n", err)
 					return
