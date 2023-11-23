@@ -38,7 +38,7 @@ func main() {
 	// }
 	// defer file.Close()
 	// producer := csv.NewCSVProducer(file)
-	producer := csv.NewYFinanceProducer("AAPL", csv.YFinanceInterval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
+	producer := csv.NewYFinanceProducer("AAPL", market.Interval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
 	rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
 
