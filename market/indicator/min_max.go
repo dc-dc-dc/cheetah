@@ -11,6 +11,13 @@ import (
 
 var _ market.CachableReceiver = (*MinMaxIndicator)(nil)
 
+func MinMaxCacheKey(window int, min bool) string {
+	if min {
+		return fmt.Sprintf("indicator.min_max.%d.min", window)
+	}
+	return fmt.Sprintf("indicator.min_max.%d.max", window)
+}
+
 type indexPrice struct {
 	index int
 	price decimal.Decimal
@@ -40,14 +47,7 @@ func newMinMaxIndicator(window int, min bool) *MinMaxIndicator {
 }
 
 func (mm *MinMaxIndicator) CacheKey() string {
-	return fmt.Sprintf("indicator.min_max.%d.%s", mm.window, mm.Type())
-}
-
-func (mm *MinMaxIndicator) Type() string {
-	if mm.min {
-		return "min"
-	}
-	return "max"
+	return MinMaxCacheKey(mm.window, mm.min)
 }
 
 func (mm *MinMaxIndicator) compare(first, other decimal.Decimal) bool {

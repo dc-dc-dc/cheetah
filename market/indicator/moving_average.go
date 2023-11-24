@@ -9,6 +9,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+func SimpleMovingAverageCacheKey(window int) string {
+	return fmt.Sprintf("indicator.moving_average.%d.simple", window)
+}
+
+func ExponentialMovingAverageCacheKey(window int) string {
+	return fmt.Sprintf("indicator.moving_average.%d.exponential", window)
+}
+
 var _ market.CachableReceiver = (*MovingAverage)(nil)
 var _ MovingAverageCalc = SimpleMovingAverageCalc
 
@@ -56,14 +64,10 @@ func NewMovingAverage(count int, simple bool) *MovingAverage {
 }
 
 func (sa *MovingAverage) CacheKey() string {
-	return fmt.Sprintf("indicator.moving_average.%s.%d", sa.Type(), sa.queue.Cap())
-}
-
-func (sa *MovingAverage) Type() string {
 	if sa.simple {
-		return "simple"
+		return SimpleMovingAverageCacheKey(sa.queue.Cap())
 	}
-	return "exponential"
+	return ExponentialMovingAverageCacheKey(sa.queue.Cap())
 }
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
