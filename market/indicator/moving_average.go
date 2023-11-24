@@ -2,6 +2,7 @@ package indicator
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/dc-dc-dc/cheetah/market"
@@ -9,16 +10,15 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func SimpleMovingAverageCacheKey(window int) string {
-	return fmt.Sprintf("indicator.moving_average.%d.simple", window)
-}
+const (
+	movingAveragePrefixKey = "indicator.moving_average"
+)
 
-func ExponentialMovingAverageCacheKey(window int) string {
-	return fmt.Sprintf("indicator.moving_average.%d.exponential", window)
+func init() {
+	market.RegisterSerializableReceiver(movingAveragePrefixKey, func() market.SerializableReceiver {
+		return &MovingAverage{}
+	})
 }
-
-var _ market.CachableReceiver = (*MovingAverage)(nil)
-var _ MovingAverageCalc = SimpleMovingAverageCalc
 
 type MovingAverageCalc func([]decimal.Decimal) decimal.Decimal
 
@@ -41,6 +41,14 @@ func ExponentialMovingAverageCalc(items []decimal.Decimal) decimal.Decimal {
 		}
 	}
 	return sum
+}
+
+func SimpleMovingAverageCacheKey(window int) string {
+	return fmt.Sprintf("%s.%d.simple", movingAveragePrefixKey, window)
+}
+
+func ExponentialMovingAverageCacheKey(window int) string {
+	return fmt.Sprintf("%s.%d.exponential", movingAveragePrefixKey, window)
 }
 
 type MovingAverage struct {
@@ -70,6 +78,10 @@ func (sa *MovingAverage) CacheKey() string {
 	return ExponentialMovingAverageCacheKey(sa.queue.Cap())
 }
 
+func (sa *MovingAverage) PrefixKey() string {
+	return movingAveragePrefixKey
+}
+
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
 	cache, ok := ctx.Value(market.ContextCache).(market.MarketCache)
 	if !ok {
@@ -89,3 +101,33 @@ func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) er
 	}
 	return nil
 }
+
+func (sa *MovingAverage) String() string {
+	return fmt.Sprintf("MovingAverage{window=%d, simple=%t}", sa.queue.Cap(), sa.simple)
+}
+
+type movingAverageJson struct {
+	Simple bool `json:"simple"`
+	Window int  `json:"window"`
+}
+
+func (sa *MovingAverage) MarshalJSON() ([]byte, error) {
+	return json.Marshal(movingAverageJson{
+		Simple: sa.simple,
+		Window: sa.queue.Cap(),
+	})
+}
+
+func (sa *MovingAverage) UnmarshalJSON(data []byte) error {
+	var raw movingAverageJson
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	sa.simple = raw.Simple
+	sa.queue = util.NewCappedQueue(raw.Window)
+	return nil
+}
+
+var _ market.CachableReceiver = (*MovingAverage)(nil)
+var _ market.SerializableReceiver = (*MovingAverage)(nil)
+var _ MovingAverageCalc = SimpleMovingAverageCalc

@@ -16,15 +16,10 @@ func RegisterSerializableReceiver(key string, generator SerializableReceiverGene
 }
 
 func GetSerializableReceivers(receivers []MarketReceiver) []SerializableReceiver {
-	res := make([]SerializableReceiver, 0)
+	res := make([]SerializableReceiver, 0, len(receivers))
 	for _, receiver := range receivers {
-		switch receiver.(type) {
-		case SerializableReceiver:
-			{
-				serializableReceiver := receiver.(SerializableReceiver)
-				res = append(res, serializableReceiver)
-				break
-			}
+		if serializableReceiver, ok := receiver.(SerializableReceiver); ok {
+			res = append(res, serializableReceiver)
 		}
 	}
 	return res
