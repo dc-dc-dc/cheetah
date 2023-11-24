@@ -71,7 +71,6 @@ func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) er
 	if !ok {
 		return market.ErrNoContextCache
 	}
-
 	sa.queue.Push(line.Close)
 	if sa.queue.Full() {
 		items := make([]decimal.Decimal, sa.queue.Cap())
