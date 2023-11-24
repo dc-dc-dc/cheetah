@@ -2,6 +2,7 @@ package basic
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/dc-dc-dc/cheetah/exchange"
@@ -41,20 +42,54 @@ func (b *basicExchange) Receive(ctx context.Context, line market.MarketLine) err
 	activeOrders := activePosition.ActiveOrders()
 	for _, order := range activeOrders {
 		if order.IsBuy() {
-			// if the order is a buy order, then we need to check if the price is lower than the current price
-			if order.Price.GreaterThanOrEqual(line.Close) {
-				// if the price is lower than the current price, then we need to fill the order
-				order.Filled = order.Requested
-				order.FilledPrice = order.Price
-				order.FilledAt = time.Now()
+			switch order.Type {
+			case exchange.OrderTypeMarket:
+				{
+					order.Filled = order.Requested
+					order.FilledPrice = line.Close
+					order.FilledAt = time.Now()
+					break
+				}
+			case exchange.OrderTypeLimit:
+				{
+					if order.Price.GreaterThanOrEqual(line.Close) {
+						// if the price is lower than the current price, then we need to fill the order
+						order.Filled = order.Requested
+						order.FilledPrice = order.Price
+						order.FilledAt = time.Now()
+						break
+					}
+				}
+			default:
+				{
+					fmt.Printf("unknown order type: %v\n", order.Type)
+				}
 			}
+
 		} else {
 			// we are selling so the price needs to be lower
-			if order.Price.LessThanOrEqual(line.Close) {
-				// if the price is lower than the current price, then we need to fill the order
-				order.Filled = order.Requested
-				order.FilledPrice = order.Price
-				order.FilledAt = time.Now()
+			switch order.Type {
+			case exchange.OrderTypeMarket:
+				{
+					order.Filled = order.Requested
+					order.FilledPrice = line.Close
+					order.FilledAt = time.Now()
+					break
+				}
+			case exchange.OrderTypeLimit:
+				{
+					if order.Price.LessThanOrEqual(line.Close) {
+						// if the price is lower than the current price, then we need to fill the order
+						order.Filled = order.Requested
+						order.FilledPrice = order.Price
+						order.FilledAt = time.Now()
+						break
+					}
+				}
+			default:
+				{
+					fmt.Printf("unknown order type: %v\n", order.Type)
+				}
 			}
 		}
 	}
