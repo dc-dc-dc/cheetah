@@ -74,9 +74,9 @@ func (mm *MinMaxIndicator) compare(first, other decimal.Decimal) bool {
 }
 func (mm *MinMaxIndicator) Receive(ctx context.Context, line market.MarketLine) error {
 	mm.count += 1
-	cache, ok := ctx.Value(market.ContextCache).(market.MarketCache)
-	if !ok {
-		return market.ErrNoContextCache
+	cache, err := market.GetCache(ctx)
+	if err != nil {
+		return err
 	}
 	for mm.queue.Count() > 0 && mm.count >= mm.queue.First().index {
 		mm.queue.PopLeft()

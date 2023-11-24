@@ -83,9 +83,9 @@ func (sa *MovingAverage) PrefixKey() string {
 }
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
-	cache, ok := ctx.Value(market.ContextCache).(market.MarketCache)
-	if !ok {
-		return market.ErrNoContextCache
+	cache, err := market.GetCache(ctx)
+	if err != nil {
+		return err
 	}
 	sa.queue.Push(line.Close)
 	if sa.queue.Full() {

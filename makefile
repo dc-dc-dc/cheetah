@@ -11,4 +11,4 @@ example_exchange:
 	go run ./cmd/example_exchange/main.go
 
 example_market:
-	go run ./cmd/example_market/main.go
+	go run ./cmd/market_example/main.go

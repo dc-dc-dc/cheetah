@@ -11,6 +11,7 @@ import (
 
 	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/dc-dc-dc/cheetah/market/basic"
+	"github.com/dc-dc-dc/cheetah/market/csv"
 	"github.com/dc-dc-dc/cheetah/market/indicator"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	out := make(chan market.MarketLine)
 	ctx := context.Background()
 
-	producer := fakeProducer()
+	// producer := fakeProducer()
 	// file, err := os.Open("data/apple.csv")
 	// if err != nil {
 	// 	fmt.Printf("err: %v\n", err)
@@ -40,14 +41,15 @@ func main() {
 	// }
 	// defer file.Close()
 	// producer := csv.NewCSVProducer(file)
-	// producer := csv.NewYFinanceProducer("AAPL", market.Interval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
+	producer := csv.NewYFinanceProducer("AAPL", market.Interval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
 	// rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
 	rcvMgr.AddReceiver(
 		market.NewChainedReceiver(
-			indicator.NewMinIndicator(2),
-			market.NewChainedReceiver(indicator.NewMinIndicator(2)),
-			indicator.NewExponentialMovingAverage(5),
+			// indicator.NewMinIndicator(2),
+			// market.NewChainedReceiver(indicator.NewMinIndicator(2)),
+			// indicator.NewExponentialMovingAverage(5),
+			indicator.NewMacd(),
 			basic.NewBasicReceiver(),
 		),
 	)
