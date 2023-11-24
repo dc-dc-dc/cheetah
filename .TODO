@@ -1,0 +1,8 @@
+✔ create a serializable strategy class to save/load strategies @done (11/24/2023, 3:19:32 PM)
+
+☐ write tests for market functions/classes
+☐ write some more indicators
+    ☐ MACD
+    ☐ RSI
+    ☐ Bollinger Bands
+    ☐ WVAP
