@@ -52,7 +52,7 @@ func ExponentialMovingAverageCacheKey(window int) string {
 }
 
 type MovingAverage struct {
-	queue  *util.CappedQueue
+	queue  *util.CappedQueue[decimal.Decimal]
 	simple bool
 }
 
@@ -66,7 +66,7 @@ func NewExponentialMovingAverage(count int) *MovingAverage {
 
 func NewMovingAverage(count int, simple bool) *MovingAverage {
 	return &MovingAverage{
-		queue:  util.NewCappedQueue(count),
+		queue:  util.NewCappedQueue[decimal.Decimal](count),
 		simple: simple,
 	}
 }
@@ -89,10 +89,7 @@ func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) er
 	}
 	sa.queue.Push(line.Close)
 	if sa.queue.Full() {
-		items := make([]decimal.Decimal, sa.queue.Cap())
-		for i, t := range sa.queue.Elements() {
-			items[i] = t.(decimal.Decimal)
-		}
+		items := sa.queue.Elements()
 		if sa.simple {
 			cache[sa.CacheKey()] = SimpleMovingAverageCalc(items)
 		} else {
@@ -124,7 +121,7 @@ func (sa *MovingAverage) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	sa.simple = raw.Simple
-	sa.queue = util.NewCappedQueue(raw.Window)
+	sa.queue = util.NewCappedQueue[decimal.Decimal](raw.Window)
 	return nil
 }
 

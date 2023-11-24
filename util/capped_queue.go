@@ -1,32 +1,32 @@
 package util
 
-type CappedQueue struct {
+type CappedQueue[T any] struct {
 	cap   int
-	queue *Queue
+	queue *Queue[T]
 }
 
-func NewCappedQueue(cap int) *CappedQueue {
-	return &CappedQueue{
+func NewCappedQueue[T any](cap int) *CappedQueue[T] {
+	return &CappedQueue[T]{
 		cap:   cap,
-		queue: NewQueue(),
+		queue: NewQueue[T](),
 	}
 }
 
-func (cq *CappedQueue) Push(item interface{}) {
+func (cq *CappedQueue[T]) Push(item T) {
 	if cq.queue.Count() == cq.cap {
 		cq.queue.PopLeft()
 	}
 	cq.queue.Push(item)
 }
 
-func (cq *CappedQueue) Elements() []interface{} {
+func (cq *CappedQueue[T]) Elements() []T {
 	return cq.queue.Elements()
 }
 
-func (cq *CappedQueue) Cap() int {
+func (cq *CappedQueue[T]) Cap() int {
 	return cq.cap
 }
 
-func (cq *CappedQueue) Full() bool {
+func (cq *CappedQueue[T]) Full() bool {
 	return cq.queue.Count() == cq.cap
 }

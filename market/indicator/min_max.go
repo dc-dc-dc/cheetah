@@ -37,7 +37,7 @@ type indexPrice struct {
 
 type MinMaxIndicator struct {
 	count  int
-	queue  *util.Queue
+	queue  *util.Queue[indexPrice]
 	window int
 	min    bool
 }
@@ -52,7 +52,7 @@ func NewMaxIndicator(window int) *MinMaxIndicator {
 
 func newMinMaxIndicator(window int, min bool) *MinMaxIndicator {
 	return &MinMaxIndicator{
-		queue:  util.NewQueue(),
+		queue:  util.NewQueue[indexPrice](),
 		min:    min,
 		window: window,
 	}
@@ -78,15 +78,15 @@ func (mm *MinMaxIndicator) Receive(ctx context.Context, line market.MarketLine) 
 	if !ok {
 		return market.ErrNoContextCache
 	}
-	for mm.queue.Count() > 0 && mm.count >= mm.queue.First().(indexPrice).index {
+	for mm.queue.Count() > 0 && mm.count >= mm.queue.First().index {
 		mm.queue.PopLeft()
 	}
 
-	for mm.queue.Count() > 0 && mm.compare(mm.queue.Last().(indexPrice).price, line.Close) {
+	for mm.queue.Count() > 0 && mm.compare(mm.queue.Last().price, line.Close) {
 		mm.queue.Pop()
 	}
 	mm.queue.Push(indexPrice{mm.count + mm.window, line.Close})
-	cache[mm.CacheKey()] = mm.queue.First().(indexPrice).price
+	cache[mm.CacheKey()] = mm.queue.First().price
 	return nil
 }
 
@@ -102,7 +102,7 @@ func (mm *MinMaxIndicator) UnmarshalJSON(data []byte) error {
 	}
 	mm.window = j.Window
 	mm.min = j.Min
-	mm.queue = util.NewQueue()
+	mm.queue = util.NewQueue[indexPrice]()
 	return nil
 }
 

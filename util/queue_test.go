@@ -8,7 +8,7 @@ import (
 )
 
 func TestQueue(t *testing.T) {
-	queue := util.NewQueue()
+	queue := util.NewQueue[int]()
 	assert.NotNil(t, queue)
 	queue.Pop()
 	queue.PopLeft()
@@ -18,7 +18,7 @@ func TestQueue(t *testing.T) {
 	assert.Equal(t, queue.Count(), 3)
 	assert.Equal(t, queue.First(), 1)
 	assert.Equal(t, queue.Last(), 3)
-	assert.Equal(t, queue.Elements(), []interface{}{1, 2, 3})
+	assert.Equal(t, queue.Elements(), []int{1, 2, 3})
 	queue.Pop()
 	assert.Equal(t, queue.Count(), 2)
 	assert.Equal(t, queue.First(), 1)
@@ -29,13 +29,13 @@ func TestQueue(t *testing.T) {
 	assert.Equal(t, queue.Last(), 2)
 	queue.Pop()
 	assert.Equal(t, queue.Count(), 0)
-	assert.Nil(t, queue.First())
-	assert.Nil(t, queue.Last())
+	assert.Zero(t, queue.First())
+	assert.Zero(t, queue.Last())
 	queue.Push(1)
 	assert.Equal(t, queue.Count(), 1)
 	queue.PopLeft()
 	assert.Equal(t, queue.Count(), 0)
-	assert.Nil(t, queue.First())
-	assert.Nil(t, queue.Last())
+	assert.Zero(t, queue.First())
+	assert.Zero(t, queue.Last())
 
 }

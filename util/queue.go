@@ -1,16 +1,16 @@
 package util
 
-type Queue struct {
-	head  *DoublyLinkedListNode
-	tail  *DoublyLinkedListNode
+type Queue[T any] struct {
+	head  *DoublyLinkedListNode[T]
+	tail  *DoublyLinkedListNode[T]
 	count int
 }
 
-func NewQueue() *Queue {
-	return &Queue{}
+func NewQueue[T any]() *Queue[T] {
+	return &Queue[T]{}
 }
 
-func (q *Queue) Push(item interface{}) {
+func (q *Queue[T]) Push(item T) {
 	q.count += 1
 	if q.head == nil {
 		q.head = NewDoublyLinkedListNode(item)
@@ -23,29 +23,29 @@ func (q *Queue) Push(item interface{}) {
 	}
 }
 
-func (q *Queue) Elements() []interface{} {
-	res := make([]interface{}, 0)
+func (q *Queue[T]) Elements() []T {
+	res := make([]T, 0)
 	for node := q.head; node != nil; node = node.next {
 		res = append(res, node.value)
 	}
 	return res
 }
 
-func (q *Queue) First() interface{} {
+func (q *Queue[T]) First() T {
 	if q.head == nil {
-		return nil
+		return *new(T)
 	}
 	return q.head.value
 }
 
-func (q *Queue) Last() interface{} {
+func (q *Queue[T]) Last() T {
 	if q.tail == nil {
-		return nil
+		return *new(T)
 	}
 	return q.tail.value
 }
 
-func (q *Queue) PopLeft() {
+func (q *Queue[T]) PopLeft() {
 	if q.head == nil {
 		return
 	}
@@ -60,7 +60,7 @@ func (q *Queue) PopLeft() {
 	q.head.prev = nil
 }
 
-func (q *Queue) Pop() {
+func (q *Queue[T]) Pop() {
 	if q.head == nil {
 		return
 	}
@@ -73,6 +73,6 @@ func (q *Queue) Pop() {
 	q.tail = q.tail.prev
 }
 
-func (q *Queue) Count() int {
+func (q *Queue[T]) Count() int {
 	return q.count
 }

@@ -1,28 +1,24 @@
 package util
 
-type LinkedListNode struct {
-	value interface{}
-	next  *LinkedListNode
+type LinkedListNode[T any] struct {
+	value T
+	next  *LinkedListNode[T]
 }
 
-func NewLinkedListNode(value interface{}) *LinkedListNode {
-	return &LinkedListNode{
+func NewLinkedListNode[T any](value T) *LinkedListNode[T] {
+	return &LinkedListNode[T]{
 		value: value,
 	}
 }
 
-type DoublyLinkedListNode struct {
-	value interface{}
-	next  *DoublyLinkedListNode
-	prev  *DoublyLinkedListNode
+type DoublyLinkedListNode[T any] struct {
+	value T
+	next  *DoublyLinkedListNode[T]
+	prev  *DoublyLinkedListNode[T]
 }
 
-func NewDoublyLinkedListNode(value interface{}) *DoublyLinkedListNode {
-	return &DoublyLinkedListNode{
+func NewDoublyLinkedListNode[T any](value T) *DoublyLinkedListNode[T] {
+	return &DoublyLinkedListNode[T]{
 		value: value,
 	}
-}
-
-type LinkedList struct {
-	head *LinkedListNode
 }

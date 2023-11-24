@@ -8,7 +8,7 @@ import (
 )
 
 func TestCappedQueue(t *testing.T) {
-	queue := util.NewCappedQueue(3)
+	queue := util.NewCappedQueue[int](3)
 	assert.NotNil(t, queue)
 	assert.Equal(t, queue.Cap(), 3)
 	queue.Push(1)
@@ -16,7 +16,7 @@ func TestCappedQueue(t *testing.T) {
 	queue.Push(2)
 	queue.Push(3)
 	assert.True(t, queue.Full())
-	assert.Equal(t, queue.Elements(), []interface{}{1, 2, 3})
+	assert.Equal(t, queue.Elements(), []int{1, 2, 3})
 	queue.Push(4)
-	assert.Equal(t, queue.Elements(), []interface{}{2, 3, 4})
+	assert.Equal(t, queue.Elements(), []int{2, 3, 4})
 }
