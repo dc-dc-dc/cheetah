@@ -43,7 +43,14 @@ func main() {
 	// producer := csv.NewYFinanceProducer("AAPL", market.Interval1Day, time.Now().Add(-1*365*24*time.Hour), time.Now())
 	rcvMgr := market.NewReceiverManager(ctx)
 	// rcvMgr.AddReceiver(basic.NewBasicReceiver(), basic.NewCountReceiver())
-	rcvMgr.AddReceiver(market.NewChainedReceiver(indicator.NewMinIndicator(2), indicator.NewExponentialMovingAverage(5), basic.NewBasicReceiver()))
+	rcvMgr.AddReceiver(
+		market.NewChainedReceiver(
+			indicator.NewMinIndicator(2),
+			market.NewChainedReceiver(indicator.NewMinIndicator(2)),
+			indicator.NewExponentialMovingAverage(5),
+			basic.NewBasicReceiver(),
+		),
+	)
 	// For testing purposes...
 	// Create a producer
 	//

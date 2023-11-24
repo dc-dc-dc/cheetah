@@ -2,42 +2,58 @@ package market
 
 import (
 	"context"
+
+	"github.com/dc-dc-dc/cheetah/util"
 )
 
-var _ MarketReceiver = (*chainedReceiver)(nil)
+var _ MarketReceiver = (*ChainedReceiver)(nil)
 
 const (
 	ContextCache = "receiver.cache"
 )
 
-type chainedReceiver struct {
+type ChainedReceiver struct {
 	receivers []MarketReceiver
 }
 
 type MarketCache map[string]interface{}
 
-func simplifyReceivers(receivers []MarketReceiver) []MarketReceiver {
-	cache := make(map[string]interface{})
+func NewChainedReceiver(receivers ...MarketReceiver) *ChainedReceiver {
+	cr := &ChainedReceiver{
+		receivers: receivers,
+	}
+	cr.DedupReceivers(util.NewSet())
+	return cr
+}
+
+func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set) {
 	res := []MarketReceiver{}
-	for _, receiver := range receivers {
-		if cachable, ok := receiver.(CachableReceiver); ok {
-			if _, ok := cache[cachable.CacheKey()]; ok {
-				continue
+	for _, receiver := range cr.receivers {
+		switch receiver.(type) {
+		case CachableReceiver:
+			{
+				cachable := receiver.(CachableReceiver)
+				if keySet.Contains(cachable.CacheKey()) {
+					break
+				}
+				keySet.Add(cachable.CacheKey())
+				res = append(res, receiver)
+				break
 			}
-			cache[cachable.CacheKey()] = nil
+		case *ChainedReceiver:
+			{
+				chained := receiver.(*ChainedReceiver)
+				chained.DedupReceivers(keySet)
+				res = append(res, receiver)
+			}
+		default:
+			res = append(res, receiver)
 		}
-		res = append(res, receiver)
 	}
-	return res
+	cr.receivers = res
 }
 
-func NewChainedReceiver(receivers ...MarketReceiver) *chainedReceiver {
-	return &chainedReceiver{
-		receivers: simplifyReceivers(receivers),
-	}
-}
-
-func (r *chainedReceiver) Receive(ctx context.Context, line MarketLine) error {
+func (r *ChainedReceiver) Receive(ctx context.Context, line MarketLine) error {
 	ctx = context.WithValue(ctx, ContextCache, make(MarketCache))
 	for _, receiver := range r.receivers {
 		if err := receiver.Receive(ctx, line); err != nil {
