@@ -1,6 +1,9 @@
 package market
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 type MarketReceiver interface {
 	Receive(context.Context, MarketLine) error
@@ -8,6 +11,13 @@ type MarketReceiver interface {
 
 type CachableReceiver interface {
 	CacheKey() string
+	MarketReceiver
+}
+
+type SerializableReceiver interface {
+	PrefixKey() string
+	json.Marshaler
+	json.Unmarshaler
 	MarketReceiver
 }
 

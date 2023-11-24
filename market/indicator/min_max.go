@@ -2,6 +2,7 @@ package indicator
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/dc-dc-dc/cheetah/market"
@@ -9,13 +10,24 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const (
+	minMaxPrefixKey = "indicator.min_max"
+)
+
+func init() {
+	market.RegisterSerializableReceiver(minMaxPrefixKey, func() market.SerializableReceiver {
+		return &MinMaxIndicator{}
+	})
+}
+
 var _ market.CachableReceiver = (*MinMaxIndicator)(nil)
+var _ market.SerializableReceiver = (*MinMaxIndicator)(nil)
 
 func MinMaxCacheKey(window int, min bool) string {
 	if min {
-		return fmt.Sprintf("indicator.min_max.%d.min", window)
+		return fmt.Sprintf("%s.%d.min", minMaxPrefixKey, window)
 	}
-	return fmt.Sprintf("indicator.min_max.%d.max", window)
+	return fmt.Sprintf("%s.%d.max", minMaxPrefixKey, window)
 }
 
 type indexPrice struct {
@@ -46,6 +58,10 @@ func newMinMaxIndicator(window int, min bool) *MinMaxIndicator {
 	}
 }
 
+func (mm *MinMaxIndicator) PrefixKey() string {
+	return minMaxPrefixKey
+}
+
 func (mm *MinMaxIndicator) CacheKey() string {
 	return MinMaxCacheKey(mm.window, mm.min)
 }
@@ -72,4 +88,31 @@ func (mm *MinMaxIndicator) Receive(ctx context.Context, line market.MarketLine) 
 	mm.queue.Push(indexPrice{mm.count + mm.window, line.Close})
 	cache[mm.CacheKey()] = mm.queue.First().(indexPrice).price
 	return nil
+}
+
+type minMaxIndicatorJSON struct {
+	Window int  `json:"window"`
+	Min    bool `json:"min"`
+}
+
+func (mm *MinMaxIndicator) UnmarshalJSON(data []byte) error {
+	var j minMaxIndicatorJSON
+	if err := json.Unmarshal(data, &j); err != nil {
+		return err
+	}
+	mm.window = j.Window
+	mm.min = j.Min
+	mm.queue = util.NewQueue()
+	return nil
+}
+
+func (mm *MinMaxIndicator) MarshalJSON() ([]byte, error) {
+	return json.Marshal(minMaxIndicatorJSON{
+		Window: mm.window,
+		Min:    mm.min,
+	})
+}
+
+func (mm *MinMaxIndicator) String() string {
+	return fmt.Sprintf("MinMaxIndicator{window=%d, min=%v}", mm.window, mm.min)
 }

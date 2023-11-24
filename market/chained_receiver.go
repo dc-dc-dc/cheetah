@@ -2,15 +2,23 @@ package market
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dc-dc-dc/cheetah/util"
 )
 
-var _ MarketReceiver = (*ChainedReceiver)(nil)
+var _ SerializableReceiver = (*ChainedReceiver)(nil)
 
 const (
-	ContextCache = "receiver.cache"
+	ContextCache             = "receiver.cache"
+	chainedReceiverPrefixKey = "chained_receiver"
 )
+
+func init() {
+	RegisterSerializableReceiver(chainedReceiverPrefixKey, func() SerializableReceiver {
+		return &ChainedReceiver{}
+	})
+}
 
 type ChainedReceiver struct {
 	receivers []MarketReceiver
@@ -24,6 +32,14 @@ func NewChainedReceiver(receivers ...MarketReceiver) *ChainedReceiver {
 	}
 	cr.DedupReceivers(util.NewSet())
 	return cr
+}
+
+func (cr *ChainedReceiver) PrefixKey() string {
+	return chainedReceiverPrefixKey
+}
+
+func (cr *ChainedReceiver) Receivers() []MarketReceiver {
+	return cr.receivers
 }
 
 func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set) {
@@ -61,4 +77,21 @@ func (r *ChainedReceiver) Receive(ctx context.Context, line MarketLine) error {
 		}
 	}
 	return nil
+}
+
+func (r *ChainedReceiver) MarshalJSON() ([]byte, error) {
+	return SerializeReceivers(r.receivers...)
+}
+
+func (r *ChainedReceiver) UnmarshalJSON(data []byte) error {
+	rec, err := DeserializeReceivers(data)
+	if err != nil {
+		return err
+	}
+	r.receivers = rec
+	return nil
+}
+
+func (r *ChainedReceiver) String() string {
+	return fmt.Sprintf("ChainedReceiver{receivers=%v}", r.receivers)
 }
