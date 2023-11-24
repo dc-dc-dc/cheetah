@@ -8,7 +8,6 @@ import (
 
 const (
 	ContextReceiverIndex = "receiver.index"
-	ContextCache         = "receiver.cache"
 )
 
 type ReceiverManager struct {

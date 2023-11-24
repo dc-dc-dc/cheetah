@@ -6,9 +6,15 @@ import (
 
 var _ MarketReceiver = (*chainedReceiver)(nil)
 
+const (
+	ContextCache = "receiver.cache"
+)
+
 type chainedReceiver struct {
 	receivers []MarketReceiver
 }
+
+type MarketCache map[string]interface{}
 
 func simplifyReceivers(receivers []MarketReceiver) []MarketReceiver {
 	cache := make(map[string]interface{})
@@ -32,7 +38,7 @@ func NewChainedReceiver(receivers ...MarketReceiver) *chainedReceiver {
 }
 
 func (r *chainedReceiver) Receive(ctx context.Context, line MarketLine) error {
-	ctx = context.WithValue(ctx, ContextCache, make(map[string]interface{}))
+	ctx = context.WithValue(ctx, ContextCache, make(MarketCache))
 	for _, receiver := range r.receivers {
 		if err := receiver.Receive(ctx, line); err != nil {
 			return err

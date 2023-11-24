@@ -68,7 +68,7 @@ func logLine(ctx context.Context, line market.MarketLine) {
 		str += fmt.Sprintf("[receiver-%d]", index)
 	}
 	str += fmt.Sprintf(" line: %v", line)
-	cache, ok := ctx.Value(market.ContextCache).(map[string]interface{})
+	cache, ok := ctx.Value(market.ContextCache).(market.MarketCache)
 	if ok {
 		for key, val := range cache {
 			str += fmt.Sprintf(" %s: %v", key, val)

@@ -67,7 +67,7 @@ func (sa *MovingAverage) Type() string {
 }
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
-	cache, ok := ctx.Value(market.ContextCache).(map[string]interface{})
+	cache, ok := ctx.Value(market.ContextCache).(market.MarketCache)
 	if !ok {
 		return market.ErrNoContextCache
 	}
