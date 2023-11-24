@@ -10,7 +10,6 @@ import (
 var _ SerializableReceiver = (*ChainedReceiver)(nil)
 
 const (
-	ContextCache             = "receiver.cache"
 	chainedReceiverPrefixKey = "chained_receiver"
 )
 
@@ -20,19 +19,9 @@ func init() {
 	})
 }
 
-func GetCache(ctx context.Context) (MarketCache, error) {
-	cache, ok := ctx.Value(ContextCache).(MarketCache)
-	if !ok {
-		return nil, ErrNoContextCache
-	}
-	return cache, nil
-}
-
 type ChainedReceiver struct {
 	receivers []MarketReceiver
 }
-
-type MarketCache map[string]interface{}
 
 func NewChainedReceiver(receivers ...MarketReceiver) *ChainedReceiver {
 	cr := &ChainedReceiver{

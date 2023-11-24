@@ -83,18 +83,16 @@ func (sa *MovingAverage) PrefixKey() string {
 }
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
-	cache, err := market.GetCache(ctx)
-	if err != nil {
-		return err
-	}
 	sa.queue.Push(line.Close)
 	if sa.queue.Full() {
 		items := sa.queue.Elements()
+		var res decimal.Decimal
 		if sa.simple {
-			cache[sa.CacheKey()] = SimpleMovingAverageCalc(items)
+			res = SimpleMovingAverageCalc(items)
 		} else {
-			cache[sa.CacheKey()] = ExponentialMovingAverageCalc(items)
+			res = ExponentialMovingAverageCalc(items)
 		}
+		market.SetCache(ctx, sa.CacheKey(), res)
 	}
 	return nil
 }

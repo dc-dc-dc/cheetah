@@ -74,10 +74,6 @@ func (mm *MinMaxIndicator) compare(first, other decimal.Decimal) bool {
 }
 func (mm *MinMaxIndicator) Receive(ctx context.Context, line market.MarketLine) error {
 	mm.count += 1
-	cache, err := market.GetCache(ctx)
-	if err != nil {
-		return err
-	}
 	for mm.queue.Count() > 0 && mm.count >= mm.queue.First().index {
 		mm.queue.PopLeft()
 	}
@@ -86,7 +82,7 @@ func (mm *MinMaxIndicator) Receive(ctx context.Context, line market.MarketLine) 
 		mm.queue.Pop()
 	}
 	mm.queue.Push(indexPrice{mm.count + mm.window, line.Close})
-	cache[mm.CacheKey()] = mm.queue.First().price
+	market.SetCache(ctx, mm.CacheKey(), mm.queue.First().price)
 	return nil
 }
 
