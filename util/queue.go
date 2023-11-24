@@ -1,8 +1,8 @@
 package util
 
 type Queue struct {
-	head  *LinkedListNode
-	tail  *LinkedListNode
+	head  *DoublyLinkedListNode
+	tail  *DoublyLinkedListNode
 	count int
 }
 
@@ -13,11 +13,13 @@ func NewQueue() *Queue {
 func (q *Queue) Push(item interface{}) {
 	q.count += 1
 	if q.head == nil {
-		q.head = NewLinkedListNode(item)
+		q.head = NewDoublyLinkedListNode(item)
 		q.tail = q.head
 	} else {
-		q.tail.next = NewLinkedListNode(item)
+		last := q.tail
+		q.tail.next = NewDoublyLinkedListNode(item)
 		q.tail = q.tail.next
+		q.tail.prev = last
 	}
 }
 
@@ -44,10 +46,31 @@ func (q *Queue) Last() interface{} {
 }
 
 func (q *Queue) PopLeft() {
-	if q.head != nil {
-		q.count -= 1
-		q.head = q.head.next
+	if q.head == nil {
+		return
 	}
+	q.count -= 1
+	if q.head == q.tail {
+		q.head = nil
+		q.tail = nil
+		return
+	}
+
+	q.head = q.head.next
+	q.head.prev = nil
+}
+
+func (q *Queue) Pop() {
+	if q.head == nil {
+		return
+	}
+	q.count -= 1
+	if q.head == q.tail {
+		q.head = nil
+		q.tail = nil
+		return
+	}
+	q.tail = q.tail.prev
 }
 
 func (q *Queue) Count() int {
