@@ -53,7 +53,6 @@ func (b *basicExchange) Receive(ctx context.Context, line market.MarketLine) err
 			case exchange.OrderTypeLimit:
 				{
 					if order.Price.GreaterThanOrEqual(line.Close) {
-						// if the price is lower than the current price, then we need to fill the order
 						order.Filled = order.Requested
 						order.FilledPrice = order.Price
 						order.FilledAt = time.Now()
@@ -67,7 +66,6 @@ func (b *basicExchange) Receive(ctx context.Context, line market.MarketLine) err
 			}
 
 		} else {
-			// we are selling so the price needs to be lower
 			switch order.Type {
 			case exchange.OrderTypeMarket:
 				{
@@ -79,7 +77,6 @@ func (b *basicExchange) Receive(ctx context.Context, line market.MarketLine) err
 			case exchange.OrderTypeLimit:
 				{
 					if order.Price.LessThanOrEqual(line.Close) {
-						// if the price is lower than the current price, then we need to fill the order
 						order.Filled = order.Requested
 						order.FilledPrice = order.Price
 						order.FilledAt = time.Now()
