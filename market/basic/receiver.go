@@ -50,36 +50,28 @@ func (r *errorReceiver) Receive(ctx context.Context, line market.MarketLine) err
 }
 
 type basicReceiver struct {
-	keys []string
 }
 
-func NewBasicReceiver(keys ...string) *basicReceiver {
-	return &basicReceiver{
-		keys: keys,
-	}
+func NewBasicReceiver() *basicReceiver {
+	return &basicReceiver{}
 }
 
 func (r *basicReceiver) Receive(ctx context.Context, line market.MarketLine) error {
-	logLine(ctx, line, r.keys...)
+	logLine(ctx, line)
 	return nil
 }
 
-func logLine(ctx context.Context, line market.MarketLine, keys ...string) {
+func logLine(ctx context.Context, line market.MarketLine) {
 	index, ok := ctx.Value(market.ContextReceiverIndex).(int)
 	var str string
 	if ok {
 		str += fmt.Sprintf("[receiver-%d]", index)
 	}
 	str += fmt.Sprintf(" line: %v", line)
-	if len(keys) > 0 {
-		cache, ok := ctx.Value(market.ContextCache).(map[string]interface{})
-		if ok {
-			for _, key := range keys {
-				value, ok := cache[key]
-				if ok {
-					str += fmt.Sprintf(" %s: %v", key, value)
-				}
-			}
+	cache, ok := ctx.Value(market.ContextCache).(map[string]interface{})
+	if ok {
+		for key, val := range cache {
+			str += fmt.Sprintf(" %s: %v", key, val)
 		}
 	}
 	fmt.Print(str + "\n")

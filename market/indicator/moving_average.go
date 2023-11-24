@@ -2,16 +2,15 @@ package indicator
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/dc-dc-dc/cheetah/util"
 	"github.com/shopspring/decimal"
 )
 
-var _ market.MarketReceiver = (*MovingAverage)(nil)
+var _ market.CachableReceiver = (*MovingAverage)(nil)
 var _ MovingAverageCalc = SimpleMovingAverageCalc
-
-const ContextIndicatorSimpleMovingAverage = "indicator.moving_average"
 
 type MovingAverageCalc func([]decimal.Decimal) decimal.Decimal
 
@@ -37,23 +36,34 @@ func ExponentialMovingAverageCalc(items []decimal.Decimal) decimal.Decimal {
 }
 
 type MovingAverage struct {
-	queue *util.CappedQueue
-	calc  MovingAverageCalc
+	queue  *util.CappedQueue
+	simple bool
 }
 
 func NewSimpleMovingAverage(count int) *MovingAverage {
-	return NewMovingAverage(count, SimpleMovingAverageCalc)
+	return NewMovingAverage(count, true)
 }
 
 func NewExponentialMovingAverage(count int) *MovingAverage {
-	return NewMovingAverage(count, ExponentialMovingAverageCalc)
+	return NewMovingAverage(count, false)
 }
 
-func NewMovingAverage(count int, calc MovingAverageCalc) *MovingAverage {
+func NewMovingAverage(count int, simple bool) *MovingAverage {
 	return &MovingAverage{
-		queue: util.NewCappedQueue(count),
-		calc:  calc,
+		queue:  util.NewCappedQueue(count),
+		simple: simple,
 	}
+}
+
+func (sa *MovingAverage) CacheKey() string {
+	return fmt.Sprintf("indicator.moving_average.%s.%d", sa.Type(), sa.queue.Cap())
+}
+
+func (sa *MovingAverage) Type() string {
+	if sa.simple {
+		return "simple"
+	}
+	return "exponential"
 }
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
@@ -68,7 +78,11 @@ func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) er
 		for i, t := range sa.queue.Elements() {
 			items[i] = t.(decimal.Decimal)
 		}
-		cache[ContextIndicatorSimpleMovingAverage] = sa.calc(items)
+		if sa.simple {
+			cache[sa.CacheKey()] = SimpleMovingAverageCalc(items)
+		} else {
+			cache[sa.CacheKey()] = ExponentialMovingAverageCalc(items)
+		}
 	}
 	return nil
 }
