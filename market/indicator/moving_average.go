@@ -15,7 +15,7 @@ const (
 )
 
 func init() {
-	market.RegisterSerializableReceiver(movingAveragePrefixKey, func() market.SerializableReceiver {
+	market.RegisterSerializableReceiver(movingAveragePrefixKey, func() market.MarketReceiver {
 		return &MovingAverage{}
 	})
 }

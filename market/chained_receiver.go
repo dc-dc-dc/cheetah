@@ -14,7 +14,7 @@ const (
 )
 
 func init() {
-	RegisterSerializableReceiver(chainedReceiverPrefixKey, func() SerializableReceiver {
+	RegisterSerializableReceiver(chainedReceiverPrefixKey, func() MarketReceiver {
 		return &ChainedReceiver{}
 	})
 }

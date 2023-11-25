@@ -7,7 +7,13 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type macdReceiver = market.MarketReceiver
+type macdReceiver market.MarketReceiver
+
+func init() {
+	market.RegisterSerializableReceiver(MacdCacheKey(), func() market.MarketReceiver {
+		return NewMacdReceiver()
+	})
+}
 
 func MacdCacheKey() string {
 	return "indicator.macd"
@@ -17,14 +23,18 @@ func NewMacd() macdReceiver {
 	return market.NewChainedReceiver(
 		NewExponentialMovingAverage(12),
 		NewExponentialMovingAverage(26),
-		market.NewFunctionalReceiver(func(ctx context.Context, line market.MarketLine) error {
-			ema12, err1 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(12))
-			ema26, err2 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(26))
-			if err1 != nil || err2 != nil {
-				return nil
-			}
-			market.SetCache(ctx, MacdCacheKey(), ema12.Sub(ema26))
-			return nil
-		}),
+		NewMacdReceiver(),
 	)
+}
+
+func NewMacdReceiver() market.MarketReceiver {
+	return market.NewCachableFunctionalReceiver(MacdCacheKey(), func(ctx context.Context, line market.MarketLine) error {
+		ema12, err1 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(12))
+		ema26, err2 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(26))
+		if err1 != nil || err2 != nil {
+			return nil
+		}
+		market.SetCache(ctx, MacdCacheKey(), ema12.Sub(ema26))
+		return nil
+	})
 }

@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-type SerializableReceiverGenerator func() SerializableReceiver
+type ReceiverGenerator func() MarketReceiver
 
 var (
-	serializableMap = map[string]SerializableReceiverGenerator{}
+	serializableMap = map[string]ReceiverGenerator{}
 )
 
-func RegisterSerializableReceiver(key string, generator SerializableReceiverGenerator) {
+func RegisterSerializableReceiver(key string, generator ReceiverGenerator) {
 	serializableMap[key] = generator
 }
 
@@ -27,7 +27,7 @@ func GetSerializableReceivers(receivers []MarketReceiver) []SerializableReceiver
 
 type serializableReceiverJSON struct {
 	Key string `json:"key"`
-	Raw []byte `json:"raw"`
+	Raw []byte `json:"raw,omitempty"`
 }
 
 func DeserializeReceivers(raw []byte) ([]MarketReceiver, error) {
@@ -44,8 +44,11 @@ func DeserializeReceivers(raw []byte) ([]MarketReceiver, error) {
 			return nil, fmt.Errorf("unknown receiver type: %s", receiver.Key)
 		}
 		receiverInstance := generator()
-		if err := json.Unmarshal(receiver.Raw, receiverInstance); err != nil {
-			return nil, err
+		if _, ok := receiverInstance.(SerializableDataReceiver); ok {
+			fmt.Printf("trying to unmarshal %s\n", receiver.Key)
+			if err := json.Unmarshal(receiver.Raw, receiverInstance); err != nil {
+				return nil, fmt.Errorf("failed to deserialize receiver %s: %s", receiver.Key, err)
+			}
 		}
 		res = append(res, receiverInstance)
 	}
@@ -55,10 +58,14 @@ func DeserializeReceivers(raw []byte) ([]MarketReceiver, error) {
 func SerializeReceivers(receivers ...MarketReceiver) ([]byte, error) {
 	serializableReceivers := GetSerializableReceivers(receivers)
 	res := make([]serializableReceiverJSON, len(serializableReceivers))
+	var err error
 	for i, receiver := range serializableReceivers {
-		raw, err := json.Marshal(receiver)
-		if err != nil {
-			return nil, err
+		var raw []byte = nil
+		if serializableDataReceiver, ok := receiver.(SerializableDataReceiver); ok {
+			raw, err = json.Marshal(serializableDataReceiver)
+			if err != nil {
+				return nil, err
+			}
 		}
 		res[i] = serializableReceiverJSON{receiver.PrefixKey(), raw}
 	}

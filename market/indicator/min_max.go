@@ -15,7 +15,7 @@ const (
 )
 
 func init() {
-	market.RegisterSerializableReceiver(minMaxPrefixKey, func() market.SerializableReceiver {
+	market.RegisterSerializableReceiver(minMaxPrefixKey, func() market.MarketReceiver {
 		return &MinMaxIndicator{}
 	})
 }
