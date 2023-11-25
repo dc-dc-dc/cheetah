@@ -62,7 +62,6 @@ func main() {
 				if !errors.Is(err, io.ErrClosedPipe) {
 					fmt.Printf("[producer] err: %v\n", err)
 				}
-				close(out)
 				return
 			}
 		}

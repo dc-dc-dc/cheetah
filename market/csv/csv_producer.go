@@ -1,11 +1,10 @@
 package csv
 
 import (
-	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dc-dc-dc/cheetah/market"
@@ -14,51 +13,52 @@ import (
 var _ market.MarketProducer = (*csvProducer)(nil)
 
 type csvProducer struct {
-	data io.ReadCloser
-	cols int
+	reader *CsvReader
 }
 
 func NewCsvProducer(data io.ReadCloser) *csvProducer {
 	return &csvProducer{
-		data: data,
+		reader: NewCsvReader(data),
 	}
 }
 
 // Note: always return an error to stop the producer
 func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) error {
-	reader := bufio.NewReader(p.data)
-	header, err := reader.ReadString('\n')
+	header, err := p.reader.Header()
 	if err != nil {
 		return err
 	}
-	p.cols = len(strings.Split(strings.Trim(header, "\n"), ","))
-
+	fmt.Printf("header: %+v\n", header)
 	for {
-		row, err := reader.ReadString('\n')
+		splts, err := p.reader.NextLine()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			return err
 		}
-		splts := strings.Split(strings.Trim(row, "\n"), ",")
-		if len(splts) != p.cols {
-			return io.ErrUnexpectedEOF
-		}
-		start, err := time.Parse("2006-01-02", splts[0])
+		start, err := time.Parse("2006-01-02", splts[header["date"]])
 		if err != nil {
 			return err
 		}
-		volume, err := strconv.ParseInt(splts[6], 10, 64)
+		volume, err := strconv.ParseInt(splts[header["volume"]], 10, 64)
 		if err != nil {
 			return err
 		}
 
-		line, err := market.NewMarketLineFromString(start, splts[1], splts[2], splts[3], splts[4], volume)
+		line, err := market.NewMarketLineFromString(
+			start,
+			splts[header["open"]],
+			splts[header["high"]],
+			splts[header["low"]],
+			splts[header["close"]],
+			volume,
+		)
 		if err != nil {
 			return err
 		}
 		out <- *line
 	}
+	close(out)
 	return io.ErrClosedPipe
 }
