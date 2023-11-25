@@ -11,7 +11,7 @@ type macdReceiver market.MarketReceiver
 
 func init() {
 	market.RegisterSerializableReceiver(MacdCacheKey(), func() market.MarketReceiver {
-		return NewMacdReceiver()
+		return newMacdReceiver()
 	})
 }
 
@@ -23,11 +23,11 @@ func NewMacd() macdReceiver {
 	return market.NewChainedReceiver(
 		NewExponentialMovingAverage(12),
 		NewExponentialMovingAverage(26),
-		NewMacdReceiver(),
+		newMacdReceiver(),
 	)
 }
 
-func NewMacdReceiver() market.MarketReceiver {
+func newMacdReceiver() market.MarketReceiver {
 	return market.NewCachableFunctionalReceiver(MacdCacheKey(), func(ctx context.Context, line market.MarketLine) error {
 		ema12, err1 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(12))
 		ema26, err2 := market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(26))

@@ -23,6 +23,10 @@ func EnsureMarketLineFromString(start time.Time, open, high, low, close string, 
 	return *line
 }
 
+func IsMarketNull(line MarketLine) bool {
+	return line.Open.IsZero() && line.High.IsZero() && line.Low.IsZero() && line.Close.IsZero() && line.Volume == 0
+}
+
 func NewMarketLineFromString(start time.Time, open, high, low, close string, vol int64) (*MarketLine, error) {
 	var _open, _close, _high, _low decimal.Decimal
 	var err error
