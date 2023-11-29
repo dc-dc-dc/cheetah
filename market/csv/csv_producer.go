@@ -2,7 +2,6 @@ package csv
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -28,7 +27,6 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 	if err != nil {
 		return err
 	}
-	fmt.Printf("header: %+v\n", header)
 	for {
 		splts, err := p.reader.NextLine()
 		if err != nil {
@@ -60,5 +58,5 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 		out <- *line
 	}
 	close(out)
-	return io.ErrClosedPipe
+	return nil
 }
