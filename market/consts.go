@@ -2,8 +2,10 @@ package market
 
 import "errors"
 
+type ContextKey string
+
 const (
-	ContextKeySymbol = "market:symbol"
+	ContextKeySymbol ContextKey = "market:symbol"
 )
 
 var (

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dc-dc-dc/cheetah/market"
@@ -35,7 +36,11 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 			}
 			return err
 		}
-		start, err := time.Parse("2006-01-02", splts[header["date"]])
+		var timeParse string = "2006-01-02 15:04:05-07:00"
+		if !strings.Contains(splts[header["date"]], " ") {
+			timeParse = "2006-01-02"
+		}
+		start, err := time.Parse(timeParse, splts[header["date"]])
 		if err != nil {
 			return err
 		}
