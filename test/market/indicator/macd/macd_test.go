@@ -20,15 +20,19 @@ func TestMacd(t *testing.T) {
 	// run the python script and get the results
 	// python test/market/indicator/macd_test.py
 	fmt.Printf("SKIP_PYTHON = %s\n", os.Getenv("SKIP_PYTHON"))
+	var skipPython bool
+	if os.Getenv("SKIP_PYTHON") == "true" {
+		skipPython = true
+	}
 	symbol := "AAPL"
 	timeframe := market.Interval1Day
-	startTimeStr := "2019-01-01"
-	endTimeStr := "2020-01-01"
+	startTimeStr := "2022-11-29"
+	endTimeStr := "2023-11-29"
 	startTime, _ := time.Parse("2006-01-02", startTimeStr)
 	endTime, _ := time.Parse("2006-01-02", endTimeStr)
-	if os.Getenv("SKIP_PYTHON") == "true" {
+	if !skipPython {
 		fmt.Printf("running python\n")
-		cmd := exec.Command("./macd_test.py")
+		cmd := exec.Command("python ./macd_test.py")
 		cmd.Env = append(cmd.Env, fmt.Sprintf("SYMBOL=%s", symbol))
 		cmd.Env = append(cmd.Env, fmt.Sprintf("TIMEFRAME=%s", timeframe))
 		cmd.Env = append(cmd.Env, fmt.Sprintf("START_TIME=%s", startTimeStr))
