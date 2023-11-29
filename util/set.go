@@ -1,24 +1,32 @@
 package util
 
-type Set struct {
-	m map[interface{}]interface{}
+type Set[T comparable] struct {
+	m map[T]interface{}
 }
 
-func NewSet() *Set {
-	return &Set{
-		m: make(map[interface{}]interface{}),
+func NewSet[T comparable]() *Set[T] {
+	return &Set[T]{
+		m: make(map[T]interface{}),
 	}
 }
 
-func (s *Set) Add(item interface{}) {
+func NewSetFromItr[T comparable](arr ...T) *Set[T] {
+	s := NewSet[T]()
+	for _, item := range arr {
+		s.Add(item)
+	}
+	return s
+}
+
+func (s *Set[T]) Add(item T) {
 	s.m[item] = nil
 }
 
-func (s *Set) Remove(item interface{}) {
+func (s *Set[T]) Remove(item T) {
 	delete(s.m, item)
 }
 
-func (s *Set) Contains(item interface{}) bool {
+func (s *Set[T]) Contains(item T) bool {
 	_, ok := s.m[item]
 	return ok
 }

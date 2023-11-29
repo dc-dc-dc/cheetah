@@ -27,7 +27,7 @@ func NewChainedReceiver(receivers ...MarketReceiver) *ChainedReceiver {
 	cr := &ChainedReceiver{
 		receivers: receivers,
 	}
-	cr.DedupReceivers(util.NewSet())
+	cr.DedupReceivers(util.NewSet[string]())
 	return cr
 }
 
@@ -39,24 +39,22 @@ func (cr *ChainedReceiver) Receivers() []MarketReceiver {
 	return cr.receivers
 }
 
-func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set) {
+func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set[string]) {
 	res := make([]MarketReceiver, 0, len(cr.receivers))
 	for _, receiver := range cr.receivers {
-		switch receiver.(type) {
+		switch receiver := receiver.(type) {
 		case CachableReceiver:
 			{
-				cachable := receiver.(CachableReceiver)
-				if keySet.Contains(cachable.CacheKey()) {
+				if keySet.Contains(receiver.CacheKey()) {
 					break
 				}
-				keySet.Add(cachable.CacheKey())
+				keySet.Add(receiver.CacheKey())
 				res = append(res, receiver)
 				break
 			}
 		case *ChainedReceiver:
 			{
-				chained := receiver.(*ChainedReceiver)
-				chained.DedupReceivers(keySet)
+				receiver.DedupReceivers(keySet)
 				res = append(res, receiver)
 			}
 		default:

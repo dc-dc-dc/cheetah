@@ -8,7 +8,7 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	set := util.NewSet()
+	set := util.NewSet[string]()
 	assert.NotNil(t, set)
 
 	set.Add("a")
