@@ -33,11 +33,12 @@ func SimpleMovingAverageCalc(items []decimal.Decimal) decimal.Decimal {
 func ExponentialMovingAverageCalc(items []decimal.Decimal) decimal.Decimal {
 	var sum decimal.Decimal
 	k := decimal.NewFromFloat32(2.0 / float32(len(items)+1))
+	diff := decimal.NewFromFloat32(1.0).Sub(k)
 	for i, element := range items {
 		if i == 0 {
 			sum = element
 		} else {
-			sum = element.Mul(k).Add(sum.Mul(decimal.NewFromFloat32(1.0).Sub(k)))
+			sum = element.Mul(k).Add(sum.Mul(diff))
 		}
 	}
 	return sum
@@ -84,16 +85,14 @@ func (sa *MovingAverage) PrefixKey() string {
 
 func (sa *MovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
 	sa.queue.Push(line.Close)
-	if sa.queue.Full() {
-		items := sa.queue.Elements()
-		var res decimal.Decimal
-		if sa.simple {
-			res = SimpleMovingAverageCalc(items)
-		} else {
-			res = ExponentialMovingAverageCalc(items)
-		}
-		market.SetCache(ctx, sa.CacheKey(), res)
+	items := sa.queue.Elements()
+	var res decimal.Decimal
+	if sa.simple {
+		res = SimpleMovingAverageCalc(items)
+	} else {
+		res = ExponentialMovingAverageCalc(items)
 	}
+	market.SetCache(ctx, sa.CacheKey(), res)
 	return nil
 }
 
