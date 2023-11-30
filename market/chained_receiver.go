@@ -67,7 +67,7 @@ func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set[string]) {
 func (r *ChainedReceiver) Receive(ctx context.Context, line MarketLine) error {
 	if _, err := GetCache(ctx); err != nil {
 		// Only create the cache if it does not exist
-		ctx = context.WithValue(ctx, ContextCache, make(MarketCache))
+		ctx = CreateCache(ctx)
 	}
 	for _, receiver := range r.receivers {
 		if err := receiver.Receive(ctx, line); err != nil {

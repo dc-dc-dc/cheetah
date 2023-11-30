@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ContextCache = "receiver.cache"
+	ContextCache ContextKey = "receiver.cache"
 )
 
 var (
@@ -15,6 +15,10 @@ var (
 )
 
 type MarketCache map[string]interface{}
+
+func CreateCache(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ContextCache, make(MarketCache))
+}
 
 func GetCache(ctx context.Context) (MarketCache, error) {
 	cache, ok := ctx.Value(ContextCache).(MarketCache)
