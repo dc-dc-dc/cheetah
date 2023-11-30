@@ -20,7 +20,11 @@ func (cq *CappedQueue[T]) Push(item T) {
 }
 
 func (cq *CappedQueue[T]) Elements() []T {
-	return cq.queue.Elements()
+	res := make([]T, 0, cq.cap)
+	for node := cq.queue.head; node != nil; node = node.next {
+		res = append(res, node.value)
+	}
+	return res
 }
 
 func (cq *CappedQueue[T]) Cap() int {
