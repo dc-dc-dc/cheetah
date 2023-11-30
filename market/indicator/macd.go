@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dc-dc-dc/cheetah/market"
+	"github.com/shopspring/decimal"
 )
 
 type macdReceiver market.MarketReceiver
@@ -12,6 +13,10 @@ func init() {
 	market.RegisterSerializableReceiver(MacdCacheKey(), func() market.MarketReceiver {
 		return newMacdReceiver()
 	})
+}
+
+func GetMacdFromCache(ctx context.Context) (decimal.Decimal, error) {
+	return market.GetFromCache[decimal.Decimal](ctx, MacdCacheKey())
 }
 
 func MacdCacheKey() string {
