@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+type CsvHeader = map[string]int
+
 type CsvReader struct {
 	src    io.Reader
 	reader *bufio.Reader
@@ -20,7 +22,7 @@ func NewCsvReader(src io.Reader) *CsvReader {
 	}
 }
 
-func (c *CsvReader) Header() (map[string]int, error) {
+func (c *CsvReader) Header() (CsvHeader, error) {
 	if c.line != 0 {
 		return nil, fmt.Errorf("header already read")
 	}
@@ -28,7 +30,7 @@ func (c *CsvReader) Header() (map[string]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	header := make(map[string]int)
+	header := make(CsvHeader)
 	for i, col := range line {
 		header[strings.ToLower(col)] = i
 	}
@@ -43,6 +45,9 @@ func (c *CsvReader) NextLine() ([]string, error) {
 	line, err := c.reader.ReadString('\n')
 	if err != nil {
 		return nil, err
+	}
+	if len(line) == 0 || line == "" {
+		return nil, io.EOF
 	}
 	c.line += 1
 	return strings.Split(strings.Trim(line, "\n"), ","), nil
