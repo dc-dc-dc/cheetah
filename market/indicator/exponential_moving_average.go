@@ -17,6 +17,10 @@ func ExponentialMovingAverageCacheKey(window int) string {
 	return fmt.Sprintf("%s.%d", exponentialMovingAveragePrefixKey, window)
 }
 
+func GetExponentialMovingAverageFromCache(ctx context.Context, window int) (decimal.Decimal, error) {
+	return market.GetFromCache[decimal.Decimal](ctx, ExponentialMovingAverageCacheKey(window))
+}
+
 type exponentialMovingAverage struct {
 	window int
 	last   decimal.Decimal

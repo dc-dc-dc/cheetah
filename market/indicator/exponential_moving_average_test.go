@@ -32,7 +32,8 @@ func TestExponentialMovingAverage(t *testing.T) {
 		return
 	}
 	ctx := market.CreateCache(context.Background())
-	receiver := indicator.NewExponentialMovingAverage(12)
+	window := 12
+	receiver := indicator.NewExponentialMovingAverage(window)
 	for {
 		line, err := csvReader.NextLine()
 		if err != nil {
@@ -47,7 +48,7 @@ func TestExponentialMovingAverage(t *testing.T) {
 			return
 		}
 		if line[ema12Index] != "" {
-			ema, err := market.GetFromCache[decimal.Decimal](ctx, receiver.CacheKey())
+			ema, err := indicator.GetExponentialMovingAverageFromCache(ctx, window)
 			if err != nil {
 				t.Errorf("error getting ema from cache: %s", err.Error())
 				return
