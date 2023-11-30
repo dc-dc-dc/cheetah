@@ -31,10 +31,7 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 	for {
 		splts, err := p.reader.NextLine()
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
+			break
 		}
 		var timeParse string = "2006-01-02 15:04:05-07:00"
 		if !strings.Contains(splts[header["date"]], " ") {
@@ -42,11 +39,11 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 		}
 		start, err := time.Parse(timeParse, splts[header["date"]])
 		if err != nil {
-			return err
+			break
 		}
 		volume, err := strconv.ParseInt(splts[header["volume"]], 10, 64)
 		if err != nil {
-			return err
+			break
 		}
 
 		line, err := market.NewMarketLineFromString(
@@ -58,10 +55,10 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 			volume,
 		)
 		if err != nil {
-			return err
+			break
 		}
 		out <- *line
 	}
 	close(out)
-	return nil
+	return err
 }
