@@ -7,11 +7,14 @@ def download(symbol: str, start_date: str, end_date: str, time_frame: str):
 def sma(data: pd.DataFrame, window: int):
     data[f"sma{window}"] = data["Close"].rolling(window=window).mean()
 
+def ema(data: pd.DataFrame, window: int):
+    data[f"ema{window}"] = data["Close"].ewm(span=window, adjust=False).mean()
+
 def macd(data: pd.DataFrame):
-    data["ema26"] = data["Close"].ewm(span=26).mean()
-    data["ema12"] = data["Close"].ewm(span=12).mean()
+    ema(data, 12)
+    ema(data, 26)
     data["macd"] = data["ema12"] - data["ema26"]
-    data["signal"] = data["macd"].ewm(span=9).mean()
+    data["signal"] = data["macd"].ewm(span=9, adjust=False).mean()
     data["hist"] = data["macd"] - data["signal"]
 
 if __name__ == "__main__":
