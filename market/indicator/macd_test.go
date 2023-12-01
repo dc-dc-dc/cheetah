@@ -11,9 +11,23 @@ import (
 	"github.com/dc-dc-dc/cheetah/market/csv"
 	"github.com/dc-dc-dc/cheetah/market/indicator"
 	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMacd(t *testing.T) {
+	macdgen, ok := market.GetSerializableReceiverGenerator(indicator.MacdCacheKey())
+	assert.True(t, ok)
+	assert.NotNil(t, macdgen)
+	macd := macdgen()
+	assert.NotNil(t, macd)
+
+	// when nothing is in cache this should not return an error
+	ctx := market.CreateCache(context.Background())
+	err := macd.Receive(ctx, market.MarketLine{})
+	assert.NoError(t, err)
+}
+
+func TestMacdCalc(t *testing.T) {
 	file, err := os.Open(testingFileName)
 	if err != nil {
 		t.Errorf("error opening file: %s  err: %s", testingFileName, err.Error())
