@@ -2,6 +2,7 @@ package indicator_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -11,9 +12,32 @@ import (
 	"github.com/dc-dc-dc/cheetah/market/csv"
 	"github.com/dc-dc-dc/cheetah/market/indicator"
 	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExponentialMovingAverage(t *testing.T) {
+	sma := indicator.NewExponentialMovingAverage(20)
+	assert.Equal(t, "indicator.moving_average_exponential", sma.PrefixKey())
+	assert.Equal(t, "indicator.moving_average_exponential.20", sma.CacheKey())
+	assert.Equal(t, "ExponentialMovingAverage{window=20}", sma.String())
+	raw, err := json.Marshal(sma)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"window\":20}", string(raw))
+	gen, ok := market.GetSerializableReceiverGenerator(sma.PrefixKey())
+	assert.True(t, ok)
+	assert.NotNil(t, gen)
+	receiver := gen()
+	assert.NotNil(t, receiver)
+	assert.IsType(t, sma, receiver)
+	err = json.Unmarshal([]byte("{\"window\": \"testing\"}"), receiver)
+	assert.Error(t, err)
+	err = json.Unmarshal(raw, receiver)
+	assert.NoError(t, err)
+
+	assert.Equal(t, sma, receiver)
+}
+
+func TestExponentialMovingAverageCalc(t *testing.T) {
 	file, err := os.Open(testingFileName)
 	if err != nil {
 		t.Errorf("error opening file: %s  err: %s", testingFileName, err.Error())

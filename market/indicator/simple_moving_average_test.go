@@ -2,6 +2,7 @@ package indicator_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -10,19 +11,33 @@ import (
 	"github.com/dc-dc-dc/cheetah/market"
 	"github.com/dc-dc-dc/cheetah/market/csv"
 	"github.com/dc-dc-dc/cheetah/market/indicator"
-	"github.com/dc-dc-dc/cheetah/util"
 	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
-
-var (
-	testingFileName = util.GetEnv("TESTING_DATA_FILE", "./testing_data.csv")
-)
-
-func IsInRange(test, cmp, delta decimal.Decimal) bool {
-	return test.GreaterThanOrEqual(cmp.Sub(delta)) && test.LessThanOrEqual(cmp.Add(delta))
-}
 
 func TestSimpleMovingAverage(t *testing.T) {
+	sma := indicator.NewSimpleMovingAverage(20)
+	assert.Equal(t, "indicator.moving_average_simple", sma.PrefixKey())
+	assert.Equal(t, "indicator.moving_average_simple.20", sma.CacheKey())
+	assert.Equal(t, "SimpleMovingAverage{window=20}", sma.String())
+	raw, err := json.Marshal(sma)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"window\":20}", string(raw))
+	gen, ok := market.GetSerializableReceiverGenerator(sma.PrefixKey())
+	assert.True(t, ok)
+	assert.NotNil(t, gen)
+	receiver := gen()
+	assert.NotNil(t, receiver)
+	assert.IsType(t, sma, receiver)
+	err = json.Unmarshal([]byte("{\"window\": \"testing\"}"), receiver)
+	assert.Error(t, err)
+	err = json.Unmarshal(raw, receiver)
+	assert.NoError(t, err)
+
+	assert.Equal(t, sma, receiver)
+}
+
+func TestSimpleMovingAverageCalc(t *testing.T) {
 	file, err := os.Open(testingFileName)
 	if err != nil {
 		t.Errorf("error opening file: %s  err: %s", testingFileName, err.Error())

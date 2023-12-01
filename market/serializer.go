@@ -14,6 +14,10 @@ var (
 func RegisterSerializableReceiver(key string, generator ReceiverGenerator) {
 	serializableMap[key] = generator
 }
+func GetSerializableReceiverGenerator(key string) (ReceiverGenerator, bool) {
+	generator, ok := serializableMap[key]
+	return generator, ok
+}
 
 func GetSerializableReceivers(receivers []MarketReceiver) []SerializableReceiver {
 	res := make([]SerializableReceiver, 0, len(receivers))

@@ -13,6 +13,12 @@ const (
 	exponentialMovingAveragePrefixKey = "indicator.moving_average_exponential"
 )
 
+func init() {
+	market.RegisterSerializableReceiver(exponentialMovingAveragePrefixKey, func() market.MarketReceiver {
+		return &exponentialMovingAverage{}
+	})
+}
+
 func ExponentialMovingAverageCacheKey(window int) string {
 	return fmt.Sprintf("%s.%d", exponentialMovingAveragePrefixKey, window)
 }
