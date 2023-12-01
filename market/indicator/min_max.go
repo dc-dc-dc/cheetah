@@ -23,6 +23,14 @@ func init() {
 var _ market.CachableReceiver = (*MinMaxIndicator)(nil)
 var _ market.SerializableReceiver = (*MinMaxIndicator)(nil)
 
+func GetMinFromCache(ctx context.Context, window int) (decimal.Decimal, error) {
+	return market.GetFromCache[decimal.Decimal](ctx, MinMaxCacheKey(window, true))
+}
+
+func GetMaxFromCache(ctx context.Context, window int) (decimal.Decimal, error) {
+	return market.GetFromCache[decimal.Decimal](ctx, MinMaxCacheKey(window, false))
+}
+
 func MinMaxCacheKey(window int, min bool) string {
 	if min {
 		return fmt.Sprintf("%s.%d.min", minMaxPrefixKey, window)

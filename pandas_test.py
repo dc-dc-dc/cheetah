@@ -4,6 +4,12 @@ import yfinance as yf
 def download(symbol: str, start_date: str, end_date: str, time_frame: str):
     return yf.Ticker(symbol).history(start=start_date, end=end_date, interval=time_frame)
 
+def _min(data: pd.DataFrame, window: int):
+    data[f"min{window}"] = data["Close"].rolling(window=window).min()
+
+def _max(data: pd.DataFrame, window: int):
+    data[f"max{window}"] = data["Close"].rolling(window=window).max()
+
 def sma(data: pd.DataFrame, window: int):
     data[f"sma{window}"] = data["Close"].rolling(window=window).mean()
 
@@ -19,6 +25,8 @@ def macd(data: pd.DataFrame):
 
 if __name__ == "__main__":
     data = download("AAPL", "2022-11-29", "2023-11-29", "1d")
+    _min(data, 20)
+    _max(data, 20)
     sma(data, 20)
     macd(data)
     data.to_csv("testing_data.csv")
