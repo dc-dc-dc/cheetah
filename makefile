@@ -3,7 +3,7 @@ mkfile_path := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 
 coverage:
-	TESTING_DATA_FILE=$(mkfile_path)/testing_data.csv
+	TESTING_DATA_FILE=$(mkfile_path)/testing_data.csv go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 
 test:
