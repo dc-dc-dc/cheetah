@@ -20,8 +20,8 @@ def macd(data: pd.DataFrame):
     ema(data, 12)
     ema(data, 26)
     data["macd"] = data["ema12"] - data["ema26"]
-    data["signal"] = data["macd"].ewm(span=9, adjust=False).mean()
-    data["hist"] = data["macd"] - data["signal"]
+    data["macd.signal"] = data["macd"].ewm(span=9, adjust=False).mean()
+    data["macd.histogram"] = data["macd"] - data["macd.signal"]
 
 if __name__ == "__main__":
     data = download("AAPL", "2022-11-29", "2023-11-29", "1d")

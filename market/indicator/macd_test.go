@@ -45,6 +45,16 @@ func TestMacdCalc(t *testing.T) {
 		t.Errorf("testing data header does not contain macd")
 		return
 	}
+	signalIndex, ok := header["macd.signal"]
+	if !ok {
+		t.Errorf("testing data header does not contain macd.signal")
+		return
+	}
+	histogramIndex, ok := header["macd.histogram"]
+	if !ok {
+		t.Errorf("testing data header does not contain macd.histogram")
+		return
+	}
 	ctx := market.CreateCache(context.Background())
 	receiver := indicator.NewMacd()
 	for {
@@ -66,9 +76,16 @@ func TestMacdCalc(t *testing.T) {
 				t.Errorf("error getting ema from cache: %s", err.Error())
 				return
 			}
-			if !IsInRange(macd, decimal.RequireFromString(line[macdIndex]), decimal.NewFromFloat32(0.0001)) {
-				t.Errorf("line %d: %s != %s", csvReader.LineNumber(), macd.String(), line[macdIndex])
+			if !IsInRange(macd.Macd, decimal.RequireFromString(line[macdIndex]), decimal.NewFromFloat32(0.0001)) {
+				t.Errorf("macd line %d: got: %s expected: %s", csvReader.LineNumber(), macd.Macd.String(), line[macdIndex])
 			}
+			if !IsInRange(macd.Signal, decimal.RequireFromString(line[signalIndex]), decimal.NewFromFloat32(0.0001)) {
+				t.Errorf("signal line %d: got: %s expected: %s", csvReader.LineNumber(), macd.Signal.String(), line[signalIndex])
+			}
+			if !IsInRange(macd.Histogram, decimal.RequireFromString(line[histogramIndex]), decimal.NewFromFloat32(0.0001)) {
+				t.Errorf("histogram line %d: got: %s != expected: %s", csvReader.LineNumber(), macd.Histogram.String(), line[histogramIndex])
+			}
+
 		}
 	}
 }
