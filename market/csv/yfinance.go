@@ -43,7 +43,7 @@ func (p *yFinanceProducer) Fetch(ctx context.Context) (io.ReadCloser, error) {
 }
 
 func (p *yFinanceProducer) String() string {
-	return fmt.Sprintf("yFinanceProducer{symbol: %s, interval: %s, start: %s, end: %s}", p.symbol, p.interval, p.start, p.end)
+	return fmt.Sprintf("yFinanceProducer{symbol: %s, interval: %s, start: %s, end: %s}", p.symbol, p.interval, p.start.Format("2006-01-02 15:04:05"), p.end.Format("2006-01-02 15:04:05"))
 }
 
 func (p *yFinanceProducer) Produce(ctx context.Context, out chan market.MarketLine) error {
