@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"time"
@@ -50,21 +48,20 @@ func main() {
 			// market.NewChainedReceiver(indicator.NewMinIndicator(2)),
 			// indicator.NewExponentialMovingAverage(5),
 			indicator.NewMacd(),
-			basic.NewBasicReceiver(),
+			// basic.NewBasicReceiver(),
+			csv.NewCsvReceiver(os.Stdout),
 		),
 	)
 	// For testing purposes...
 	// Create a producer
 	//
 	go func(ctx context.Context, out chan market.MarketLine) {
-		for {
-			if err := producer.Produce(ctx, out); err != nil {
-				if !errors.Is(err, io.ErrClosedPipe) {
-					fmt.Printf("[producer] err: %v\n", err)
-				}
-				return
-			}
+
+		if err := producer.Produce(ctx, out); err != nil {
+			fmt.Printf("producer err: %v\n", err)
+			return
 		}
+
 	}(ctx, out)
 
 	go func() {
