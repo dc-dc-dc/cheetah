@@ -25,3 +25,8 @@ jobs:
             - name: Install dependencies
               run: |
                 go mod download
+            - name: Run Go Tests
+              env:
+                  TESTING_DATA_FILE: ${{ github.workspace }}/testing_data.csv
+              run: |
+                go test -v ./...
