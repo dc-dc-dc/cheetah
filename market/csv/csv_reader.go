@@ -46,9 +46,10 @@ func (c *CsvReader) NextLine() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	line = strings.TrimRight(line, "\n")
 	if len(line) == 0 || line == "" {
 		return nil, io.EOF
 	}
 	c.line += 1
-	return strings.Split(strings.Trim(line, "\n"), ","), nil
+	return strings.Split(line, ","), nil
 }
