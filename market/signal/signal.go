@@ -3,6 +3,6 @@ package signal
 type Signal int
 
 const (
-	BuySignal Signal = iota
+	BuySignal Signal = iota + 1
 	SellSignal
 )

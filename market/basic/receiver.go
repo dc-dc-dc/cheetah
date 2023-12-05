@@ -70,9 +70,10 @@ func logLine(ctx context.Context, line market.MarketLine) {
 	str += fmt.Sprintf(" line: %v", line)
 	cache, err := market.GetCache(ctx)
 	if err == nil {
-		for key, val := range cache {
+		cache.Range(func(key, val interface{}) bool {
 			str += fmt.Sprintf(" %s: %v", key, val)
-		}
+			return true
+		})
 	}
 	fmt.Print(str + "\n")
 }

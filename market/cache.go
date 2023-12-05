@@ -3,6 +3,7 @@ package market
 import (
 	"context"
 	"errors"
+	"sync"
 )
 
 const (
@@ -14,14 +15,12 @@ var (
 	ErrNoCacheValue   = errors.New("no cache value")
 )
 
-type MarketCache map[string]interface{}
-
 func CreateCache(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ContextCache, make(MarketCache))
+	return context.WithValue(ctx, ContextCache, &sync.Map{})
 }
 
-func GetCache(ctx context.Context) (MarketCache, error) {
-	cache, ok := ctx.Value(ContextCache).(MarketCache)
+func GetCache(ctx context.Context) (*sync.Map, error) {
+	cache, ok := ctx.Value(ContextCache).(*sync.Map)
 	if !ok {
 		return nil, ErrNoContextCache
 	}
@@ -30,7 +29,8 @@ func GetCache(ctx context.Context) (MarketCache, error) {
 
 func SetCache(ctx context.Context, key string, value any) {
 	if cache, err := GetCache(ctx); err == nil {
-		cache[key] = value
+		cache.Store(key, value)
+
 	}
 }
 
@@ -39,7 +39,7 @@ func GetFromCache[T any](ctx context.Context, key string) (T, error) {
 	if err != nil {
 		return *new(T), err
 	}
-	val, ok := cache[key]
+	val, ok := cache.Load(key)
 	if !ok {
 		return *new(T), ErrNoCacheValue
 	}

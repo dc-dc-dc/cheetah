@@ -27,9 +27,9 @@ func NewCsvReceiver(dst io.Writer) market.MarketReceiver {
 			header = append(header, []string{"Date", "Open", "High", "Low", "Close", "Volume"}...)
 		}
 		if err == nil {
-			for key, val := range cache {
+			cache.Range(func(key, val interface{}) bool {
 				if !headerSet {
-					header = append(header, key)
+					header = append(header, key.(string))
 				}
 				if v, ok := val.(interface{}); ok {
 					// loop over these...
@@ -37,7 +37,8 @@ func NewCsvReceiver(dst io.Writer) market.MarketReceiver {
 				} else {
 					elements = append(elements, GetString(val))
 				}
-			}
+				return true
+			})
 		}
 		if !headerSet {
 			if err := writer.Write(header); err != nil {
