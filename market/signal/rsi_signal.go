@@ -12,6 +12,14 @@ type RsiSignal struct {
 	last decimal.Decimal
 }
 
+const (
+	cacheKeyRsi = "signal.rsi"
+)
+
+func GetRsiSignalFromCache(ctx context.Context) (Signal, error) {
+	return market.GetFromCache[Signal](ctx, cacheKeyRsi)
+}
+
 func NewRsiSignal() *RsiSignal {
 	return &RsiSignal{}
 }
@@ -36,11 +44,11 @@ func (r *RsiSignal) Receive(ctx context.Context, line market.MarketLine) error {
 }
 
 func (r *RsiSignal) CacheKey() string {
-	return "signal.rsi"
+	return cacheKeyRsi
 }
 
 func (r *RsiSignal) PrefixKey() string {
-	return "signal.rsi"
+	return cacheKeyRsi
 }
 
 var _ market.CachableReceiver = (*RsiSignal)(nil)
