@@ -20,6 +20,15 @@ func init() {
 	})
 }
 
+func CalculateAverage(queue *util.CappedQueue[decimal.Decimal]) decimal.Decimal {
+	items := queue.Elements()
+	var sum decimal.Decimal
+	for _, element := range items {
+		sum = sum.Add(element)
+	}
+	return sum.Div(decimal.NewFromInt(int64(len(items))))
+}
+
 func SimpleMovingAverageCacheKey(window int) string {
 	return fmt.Sprintf("%s.%d", simpleMovingAveragePrefixKey, window)
 }
@@ -44,12 +53,7 @@ func (sa *simpleMovingAverage) PrefixKey() string {
 
 func (sa *simpleMovingAverage) Receive(ctx context.Context, line market.MarketLine) error {
 	sa.queue.Push(line.Close)
-	items := sa.queue.Elements()
-	var sum decimal.Decimal
-	for _, element := range items {
-		sum = sum.Add(element)
-	}
-	market.SetCache(ctx, sa.CacheKey(), sum.Div(decimal.NewFromInt(int64(len(items)))))
+	market.SetCache(ctx, sa.CacheKey(), CalculateAverage(sa.queue))
 	return nil
 }
 
