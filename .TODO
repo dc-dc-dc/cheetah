@@ -1,11 +1,15 @@
 ✔ create a serializable strategy class to save/load strategies @done (11/24/2023, 3:19:32 PM)
 
-☐ look into using bazel for cross language builds
-    - ideally run python yfinance indicators and compare to golang output
-☐ EMA is not matching with python results
-☐ write tests for market functions/classes
+✔ EMA is not matching with python results @done (12/5/2023, 12:21:09 PM)
+✔ write tests for market functions/classes @done (12/5/2023, 12:20:56 PM)
+☐ write tests for signals
+☐ market research
+    ☐ volume traded daily and select securities that meet a threshold
+    ☐ news sentiment analysis over a time period, (this will be advanced as you need to cache as well as get news)
+    ☐ earnings report analysis
+    ☐ earnings/dividend dates
 ☐ write some more indicators
     ✔ MACD @done (11/24/2023, 3:37:53 PM)
-    ☐ RSI
+    ✔ RSI @done (12/5/2023, 12:20:55 PM)
     ☐ Bollinger Bands
     ☐ WVAP
