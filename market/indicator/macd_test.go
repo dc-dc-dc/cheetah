@@ -18,7 +18,9 @@ func TestMacd(t *testing.T) {
 	macdgen, ok := market.GetSerializableReceiverGenerator(indicator.MacdCacheKey())
 	assert.True(t, ok)
 	assert.NotNil(t, macdgen)
-	macd := macdgen()
+	macdFromGen := macdgen()
+	assert.NotNil(t, macdFromGen)
+	macd := indicator.NewMacd()
 	assert.NotNil(t, macd)
 
 	// when nothing is in cache this should not return an error

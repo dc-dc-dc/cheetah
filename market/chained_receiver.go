@@ -24,10 +24,8 @@ type ChainedReceiver struct {
 }
 
 func NewChainedReceiver(receivers ...MarketReceiver) *ChainedReceiver {
-	cr := &ChainedReceiver{
-		receivers: receivers,
-	}
-	cr.DedupReceivers(util.NewSet[string]())
+	cr := &ChainedReceiver{}
+	cr.receivers = DedupReceivers(receivers, util.NewSet[string]())
 	return cr
 }
 
@@ -39,9 +37,9 @@ func (cr *ChainedReceiver) Receivers() []MarketReceiver {
 	return cr.receivers
 }
 
-func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set[string]) {
-	res := make([]MarketReceiver, 0, len(cr.receivers))
-	for _, receiver := range cr.receivers {
+func DedupReceivers(receivers []MarketReceiver, keySet *util.Set[string]) []MarketReceiver {
+	res := make([]MarketReceiver, 0, len(receivers))
+	for _, receiver := range receivers {
 		switch receiver := receiver.(type) {
 		case CachableReceiver:
 			{
@@ -54,14 +52,13 @@ func (cr *ChainedReceiver) DedupReceivers(keySet *util.Set[string]) {
 			}
 		case *ChainedReceiver:
 			{
-				receiver.DedupReceivers(keySet)
-				res = append(res, receiver)
+				res = append(res, DedupReceivers(receiver.Receivers(), keySet)...)
 			}
 		default:
 			res = append(res, receiver)
 		}
 	}
-	cr.receivers = res
+	return res
 }
 
 func (r *ChainedReceiver) Receive(ctx context.Context, line MarketLine) error {

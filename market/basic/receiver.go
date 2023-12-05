@@ -43,7 +43,7 @@ func NewErrorReceiver(explodesOn int) *errorReceiver {
 func (r *errorReceiver) Receive(ctx context.Context, line market.MarketLine) error {
 	r.current++
 	logLine(ctx, line)
-	if r.current == r.explodeOn {
+	if r.current >= r.explodeOn {
 		return fmt.Errorf("receiver error")
 	}
 	return nil

@@ -28,6 +28,7 @@ const (
 	Interval1Week
 	Interval1Month
 	Interval3Month
+	Interval1Year
 )
 
 func (i Interval) String() string {
@@ -58,6 +59,8 @@ func (i Interval) String() string {
 		return "1mo"
 	case Interval3Month:
 		return "3mo"
+	case Interval1Year:
+		return "1y"
 	}
 	return ""
 }

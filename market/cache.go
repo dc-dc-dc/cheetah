@@ -29,11 +29,9 @@ func GetCache(ctx context.Context) (MarketCache, error) {
 }
 
 func SetCache(ctx context.Context, key string, value any) {
-	cache, err := GetCache(ctx)
-	if err != nil {
-		return
+	if cache, err := GetCache(ctx); err == nil {
+		cache[key] = value
 	}
-	cache[key] = value
 }
 
 func GetFromCache[T any](ctx context.Context, key string) (T, error) {
