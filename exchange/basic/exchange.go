@@ -7,6 +7,7 @@ import (
 
 	"github.com/dc-dc-dc/cheetah/exchange"
 	"github.com/dc-dc-dc/cheetah/market"
+	"github.com/dc-dc-dc/cheetah/util"
 )
 
 var _ exchange.Exchange = (*basicExchange)(nil)
@@ -115,7 +116,7 @@ func (b *basicExchange) PlaceOrder(ctx context.Context, order exchange.Order) er
 	return nil
 }
 
-func (b *basicExchange) CancelOrder(ctx context.Context, orderId exchange.ID) error {
+func (b *basicExchange) CancelOrder(ctx context.Context, orderId util.ID) error {
 	order, ok := b.activeOrders[orderId.String()]
 	if !ok {
 		return exchange.ErrOrderNotFound

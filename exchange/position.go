@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dc-dc-dc/cheetah/market"
+	"github.com/dc-dc-dc/cheetah/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -16,7 +17,7 @@ const (
 )
 
 type Position struct {
-	ID       ID
+	ID       util.ID
 	OpenedAt time.Time
 	ClosedAt time.Time
 
@@ -27,7 +28,7 @@ type Position struct {
 
 func NewPosition(order *Order) *Position {
 	return &Position{
-		ID:     EnsureID(),
+		ID:     util.EnsureID(),
 		symbol: order.Symbol,
 		orders: []*Order{order},
 	}
