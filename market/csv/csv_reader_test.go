@@ -18,9 +18,9 @@ func TestCsv(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, csv.CsvHeader{"date": 0, "open": 1, "high": 2, "low": 3}, header)
 	assert.Equal(t, 1, reader.LineNumber())
-	_, err = reader.Header()
-	assert.Error(t, err)
-
+	header2, err := reader.Header()
+	assert.NoError(t, err)
+	assert.Equal(t, header, header2)
 	line, err := reader.NextLine()
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"0", "0", "0", "0"}, line)
