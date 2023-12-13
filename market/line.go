@@ -7,12 +7,12 @@ import (
 )
 
 type MarketLine struct {
-	Start  time.Time
-	Open   decimal.Decimal
-	High   decimal.Decimal
-	Low    decimal.Decimal
-	Close  decimal.Decimal
-	Volume int64
+	Start  time.Time       `json:"start"`
+	Open   decimal.Decimal `json:"open"`
+	High   decimal.Decimal `json:"high"`
+	Low    decimal.Decimal `json:"low"`
+	Close  decimal.Decimal `json:"close"`
+	Volume int64           `json:"volume"`
 }
 
 func EnsureMarketLineFromString(start time.Time, open, high, low, close string, vol int64) MarketLine {
