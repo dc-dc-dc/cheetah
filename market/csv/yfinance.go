@@ -11,10 +11,11 @@ import (
 )
 
 type yFinanceProducer struct {
-	symbol   market.Symbol
-	interval market.Interval
-	start    time.Time
-	end      time.Time
+	symbol      market.Symbol
+	interval    market.Interval
+	start       time.Time
+	end         time.Time
+	csvProducer *csvProducer
 }
 
 func NewYFinanceProducer(symbol string, interval market.Interval, start, end time.Time) market.MarketProducer {
@@ -47,11 +48,13 @@ func (p *yFinanceProducer) String() string {
 }
 
 func (p *yFinanceProducer) Produce(ctx context.Context, out chan market.MarketLine) error {
-	res, err := p.Fetch(ctx)
-	if err != nil {
-		return err
+	if p.csvProducer == nil {
+		res, err := p.Fetch(ctx)
+		if err != nil {
+			return err
+		}
+		ctx = context.WithValue(ctx, market.ContextKeySymbol, p.symbol)
+		p.csvProducer = NewCsvProducer(res)
 	}
-	defer res.Close()
-	ctx = context.WithValue(ctx, market.ContextKeySymbol, p.symbol)
-	return NewCsvProducer(res).Produce(ctx, out)
+	return p.csvProducer.Produce(ctx, out)
 }

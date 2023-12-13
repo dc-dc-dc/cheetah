@@ -13,6 +13,7 @@ type CsvReader struct {
 	src    io.Reader
 	reader *bufio.Reader
 	line   int
+	header CsvHeader
 }
 
 func NewCsvReader(src io.Reader) *CsvReader {
@@ -23,6 +24,9 @@ func NewCsvReader(src io.Reader) *CsvReader {
 }
 
 func (c *CsvReader) Header() (CsvHeader, error) {
+	if c.header != nil {
+		return c.header, nil
+	}
 	if c.line != 0 {
 		return nil, fmt.Errorf("header already read")
 	}
@@ -30,11 +34,11 @@ func (c *CsvReader) Header() (CsvHeader, error) {
 	if err != nil {
 		return nil, err
 	}
-	header := make(CsvHeader)
+	c.header = make(CsvHeader)
 	for i, col := range line {
-		header[strings.ToLower(col)] = i
+		c.header[strings.ToLower(col)] = i
 	}
-	return header, nil
+	return c.header, nil
 }
 
 func (c *CsvReader) LineNumber() int {

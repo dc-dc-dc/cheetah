@@ -57,21 +57,17 @@ func (p *csvProducer) Produce(ctx context.Context, out chan market.MarketLine) e
 		return err
 	}
 	var line *market.MarketLine
-	for {
-		splts, err := p.reader.NextLine()
-		if err != nil {
-			break
-		}
-		line, err = GetMarketLine(header, splts)
-		if err != nil {
-			break
-		}
-
-		if err != nil {
-			break
-		}
-		out <- *line
+	splts, err := p.reader.NextLine()
+	if err != nil {
+		close(out)
+		return err
 	}
-	close(out)
-	return err
+	line, err = GetMarketLine(header, splts)
+	if err != nil {
+		return err
+	}
+
+	out <- *line
+
+	return nil
 }
