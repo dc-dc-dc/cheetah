@@ -21,6 +21,10 @@ var (
 	StockListActiveReits    StockListOption = "industry-contains-REIT"
 )
 
+func (s StockListOption) String() string {
+	return string(s)
+}
+
 // sector   is       tag
 // industry contains tag
 
@@ -29,12 +33,12 @@ type stockListResearch struct {
 }
 
 type StockList struct {
-	Symbol    string
-	Name      string
-	MarketCap decimal.Decimal
-	Volume    decimal.Decimal
-	Industry  string
-	Sector    string
+	Symbol    string `json:"symbol"`
+	Name      string `json:"name"`
+	MarketCap uint64 `json:"market_cap"`
+	Volume    uint64 `json:"volume"`
+	Industry  string `json:"industry"`
+	Sector    string `json:"sector"`
 }
 
 type stockListResponse struct {
@@ -79,11 +83,13 @@ func (sl *stockListResearch) getStockList(ctx context.Context, f StockListOption
 	}
 	resData := make([]StockList, data.Data.Result)
 	for i, raw := range data.Data.Data {
+		// attempt to parse volume/marketcap
+		// sanitze the string
 		resData[i] = StockList{
 			Symbol:    raw.Symbol,
 			Name:      raw.Name,
-			MarketCap: raw.MarketCap,
-			Volume:    raw.Volume,
+			MarketCap: raw.MarketCap.BigInt().Uint64(),
+			Volume:    raw.Volume.BigInt().Uint64(),
 			Industry:  raw.Industry,
 			Sector:    raw.Sector,
 		}
