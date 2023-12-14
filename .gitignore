@@ -1,4 +1,5 @@
 venv/
 data/*
 *.csv*
+.env
 coverage*
