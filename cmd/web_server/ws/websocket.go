@@ -18,7 +18,7 @@ type MessageWrapper struct {
 	Payload interface{} `json:"payload"`
 }
 
-type Handler func(ctx context.Context, payload interface{}, id util.ID) error
+type Handler func(ctx context.Context, payload interface{}, id *WebSocketClient) error
 
 type WebSocketManager struct {
 	upgrader websocket.Upgrader
@@ -96,10 +96,10 @@ func (ws *WebSocketManager) listenClient(client *WebSocketClient) {
 			fmt.Printf("[web-socket] error unknown message type=%s\n", msg.Type)
 			continue
 		}
-		go func(ctx context.Context, msg MessageWrapper, id util.ID) {
-			if err := handler(ctx, msg.Payload, id); err != nil {
+		go func(ctx context.Context, msg MessageWrapper, client *WebSocketClient) {
+			if err := handler(ctx, msg.Payload, client); err != nil {
 				fmt.Printf("[web-socket] got error running handler for type=%s err=%s\n", msg.Type, err)
 			}
-		}(ctx, msg, client.ID())
+		}(ctx, msg, client)
 	}
 }
