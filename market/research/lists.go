@@ -60,7 +60,7 @@ func NewStockListResearch() *stockListResearch {
 }
 
 func (sl *stockListResearch) getStockList(ctx context.Context, f StockListOption) ([]StockList, error) {
-	url := fmt.Sprintf(util.GetEnv("RESEARCH_API_ENDPOINT", "TODO"))
+	url := fmt.Sprintf(util.GetEnv("RESEARCH_API_ENDPOINT", "TODO"), f)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
